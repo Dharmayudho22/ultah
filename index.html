@@ -127,7 +127,7 @@
     transition:opacity .55s ease,visibility .55s ease,transform .55s ease;
   }
   /* margin:auto = rata tengah tanpa memotong konten saat layar pendek */
-  .screen:not(.love-screen) > *{margin:auto;}
+  .screen:not(.love-screen):not(.flash-screen) > *{margin:auto;}
   .screen.hidden{visibility:hidden;opacity:0;pointer-events:none;transform:scale(.98);}
 
   .card{
@@ -331,6 +331,35 @@
   .page-count{margin:.8rem 0 0;color:var(--muted);font:.85rem var(--sans);}
   #revealHeart{margin-top:1rem;}
 
+  /* ===== Kilas balik (tumpukan foto cepat) ===== */
+  .flash-screen{flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+  .flash-stage{position:relative;width:min(70vw,320px);aspect-ratio:4/5;}
+  .flash-card{
+    position:absolute;inset:0;
+    padding:10px 10px 0;
+    background:#fff;border-radius:3px;
+    box-shadow:0 18px 44px rgba(0,0,0,.5);
+    transform:translate(var(--x),var(--y)) rotate(var(--r));
+    animation:dropIn .32s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .flash-card img{display:block;width:100%;height:calc(100% - 46px);object-fit:cover;background:#eadbd4;}
+  .flash-card span{display:block;height:46px;line-height:46px;text-align:center;color:#563b45;font:700 1.25rem var(--hand);}
+  @keyframes dropIn{
+    from{opacity:0;transform:translate(var(--x),calc(var(--y) - 40px)) scale(1.3) rotate(calc(var(--r) * 3));}
+    to{opacity:1;transform:translate(var(--x),var(--y)) rotate(var(--r));}
+  }
+  .flash-text{margin-top:2rem;min-height:4.2em;text-align:center;}
+  .flash-text small{display:block;margin-bottom:.35rem;color:var(--gold);font:700 .7rem var(--sans);letter-spacing:2.5px;text-transform:uppercase;}
+  .flash-text strong{display:block;font:400 clamp(1.3rem,4vw,1.8rem)/1.2 var(--serif);color:var(--ink);}
+  .flash-text.end strong{animation:rise .8s cubic-bezier(.16,1,.3,1) both;}
+  .flash-skip{
+    position:absolute;right:1rem;bottom:max(1.2rem,env(safe-area-inset-bottom));
+    padding:.5rem 1rem;border:1px solid var(--line);border-radius:99px;
+    background:rgba(35,21,31,.6);color:var(--muted);
+    font:700 .78rem var(--sans);cursor:pointer;
+  }
+  .flash-skip:hover{color:var(--ink);border-color:var(--rose);}
+
   /* ===== Layar 4: Hati 3D ===== */
   .love-screen{
     flex-direction:column;justify-content:space-between;align-items:center;
@@ -470,7 +499,7 @@
   <span class="music-waves" aria-hidden="true"><span></span><span></span><span></span></span>
 </button>
 <audio id="bgMusic" loop preload="auto">
-  <source src="music.mp3" type="audio/mpeg">
+  <source src="Music/hbd.mp3" type="audio/mpeg">
   <source src="https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3" type="audio/mpeg">
 </audio>
 
@@ -498,6 +527,13 @@
   </div>
 </section>
 
+<!-- Layar kilas balik: foto-foto berjatuhan cepat -->
+<section class="screen hidden flash-screen" id="sf" aria-label="Kilas balik kenangan" aria-hidden="true">
+  <div class="flash-stage" id="flashStage" aria-hidden="true"></div>
+  <div class="flash-text" id="flashText" aria-live="polite"><small>Kilas balik</small><strong id="flashCounter">&nbsp;</strong></div>
+  <button class="flash-skip" id="flashSkip" type="button">Lewati &#8250;</button>
+</section>
+
 <!-- Layar 3: Buku kenangan -->
 <section class="screen hidden" id="s3" aria-labelledby="memories-title" aria-hidden="true">
   <div class="book-container">
@@ -518,7 +554,7 @@
 <section class="screen hidden love-screen" id="s4" aria-labelledby="love-title" aria-hidden="true">
   <div class="love-header">
     <p class="eyebrow">Dari hati</p>
-    <h1 id="love-title">Untukmu, dengan cinta <span class="accent">&#10084;</span></h1>
+    <h1 id="love-title">Untukmu <span class="accent">&#10084;</span></h1>
     <p class="love-subtitle">Sebuah hati yang tersusun dari kenangan kita ✨</p>
   </div>
   <div class="love-center-space" aria-hidden="true"><div class="heart-fallback">&#10084;</div></div>
@@ -569,19 +605,55 @@
       content: 'Di hari yang begitu spesial ini, aku ingin mengucapkan terima kasih sudah selalu hadir dan membawa senyum serta tawa.\n\nSemoga di usiamu yang baru ini, setiap langkahmu dipenuhi kebahagiaan, kesehatan, tercapai semua impianmu, dan selalu dikelilingi hal-hal baik.\n\nTetaplah jadi dirimu yang hangat, ceria, dan luar biasa seperti ini.\n\nTak akan lelah aku mengucap syukur,\nkarena hadirmu, bahagiaku tak terukur.\nBukan fatamorgana, tapi ini nyata,\nterima kasih untuk anugerah yang luar biasa.\n\nHappy Birthday! ❤️',
       signature: 'Untukmu yang terbaik ❤️'
     },
-    // Taruh file foto di folder yang sama dengan index.html.
-    // Kalau foto tidak ditemukan, otomatis diganti kartu warna-warni.
-    photos: [
-      {src:'foto_uji_coba.png',message:'Semoga harimu seindah senyummu'},
-      {src:'foto_uji_coba.png',message:'Terima kasih sudah hadir'},
-      {src:'foto_uji_coba.png',message:'Jangan lupa bahagia hari ini'},
-      {src:'foto_uji_coba.png',message:'Selalu ada alasan untuk tersenyum'},
-      {src:'foto_uji_coba.png',message:'Semoga semua baik datang padamu'},
-      {src:'foto_uji_coba.png',message:'Terus jadi versi terbaik dirimu'},
-      {src:'foto_uji_coba.png',message:'Bahagiamu juga bahagiaku'},
-      {src:'foto_uji_coba.png',message:'Semoga cerita indah terus bertambah'}
+    // Semua foto (dipakai untuk kilas balik & hati 3D): foto-web/foto1.jpg … foto122.jpg
+    allPhotos: { folder: 'foto-web/', total: 122, skip: [101] },
+    flashbackCount: 45,          // jumlah foto di kilas balik cepat
+    heartMessage: 'Satu dari sekian banyak kenangan kita ❤',
+
+    // 📖 BUKU
+    // randomBook: true  → setiap dibuka, foto buku diambil ACAK dari semua foto
+    //                     (caption di bawah tetap dipakai berurutan).
+    // randomBook: false → pakai persis foto-foto di daftar bookPhotos.
+    randomBook: false,
+    // Nomor foto yang TIDAK boleh muncul di buku saat acak (mis. foto rombongan / orangnya kecil)
+    bookExclude: [],
+    bookPhotos: [
+      {src:'foto-web/foto3.jpg',   message:'Semoga harimu seindah senyummu'},
+      {src:'foto-web/foto14.jpg',  message:'Terima kasih sudah hadir'},
+      {src:'foto-web/foto26.jpg',  message:'Jangan lupa bahagia hari ini'},
+      {src:'foto-web/foto50.jpg',  message:'Selalu ada alasan untuk tersenyum'},
+      {src:'foto-web/foto49.jpg',  message:'Semoga semua baik datang padamu'},
+      {src:'foto-web/foto65.jpg',  message:'Terus jadi versi terbaik dirimu'},
+      {src:'foto-web/foto70.jpg',  message:'Bahagiamu juga bahagiaku'},
+      {src:'foto-web/foto84.jpg',  message:'Tawa kita yang paling jujur'},
+      {src:'foto-web/foto96.jpg',  message:'Momen kecil, arti yang besar'},
+      {src:'foto-web/foto110.jpg', message:'Semoga cerita indah terus bertambah'}
     ]
   };
+
+  const ALL_PHOTOS = (()=>{
+    const {folder, total, skip} = CONFIG.allPhotos;
+    const list = [];
+    for(let n = 1; n <= total; n++) if(!skip.includes(n)) list.push(`${folder}foto${n}.jpg`);
+    return list;
+  })();
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function loadImage(src){
+    return new Promise(resolve=>{
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = ()=>resolve(img);
+      img.onerror = ()=>resolve(null);
+      img.src = src;
+    });
+  }
 
   const $ = id => document.getElementById(id);
   const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -682,7 +754,7 @@
   function showScreen(id){
     tryPlayMusic();
     activeScreen = id;
-    const stepIndex = Number(id.slice(1)) - 1;
+    const stepIndex = {s1:0, s2:1, sf:2, s3:2, s4:3}[id];
     screens.forEach(screen=>{
       const active = screen.id === id;
       screen.classList.toggle('hidden', !active);
@@ -702,6 +774,9 @@
     }else{
       stop3D();
     }
+    if(id === 'sf') playFlashback(); else stopFlashback();
+    if(id === 's2') preloadFlashback();      // mulai unduh foto selagi user memilih PIN
+    if(id === 'sf' || id === 's3') loadHeartPhotos();
 
     // Pindahkan fokus ke tombol utama layar baru (untuk keyboard/pembaca layar)
     const target = document.querySelector(`#${id} .btn:not(:disabled), #${id} .pwd-btn`);
@@ -743,7 +818,7 @@
           launchConfetti(0.5);
           passwordMessage.textContent = 'Tepat! Hadiahmu terbuka 🎉';
           passwordGrid.querySelectorAll('button').forEach(b => b.disabled = true);
-          setTimeout(()=>showScreen('s3'), 1100);
+          setTimeout(()=>showScreen(reduceMotion ? 's3' : 'sf'), 1100);
         }else{
           wrongCount++;
           button.classList.remove('wrong');
@@ -758,6 +833,81 @@
       passwordGrid.appendChild(button);
     });
   })();
+
+  /* ========================================================
+     KILAS BALIK: foto-foto acak berjatuhan cepat, makin lama makin pelan
+     ======================================================== */
+  const flashPool = [];
+  let flashPreloadStarted = false;
+  let flashTimer = null;
+
+  function preloadFlashback(){
+    if(flashPreloadStarted) return;
+    flashPreloadStarted = true;
+    shuffle(ALL_PHOTOS).slice(0, CONFIG.flashbackCount).forEach(src=>{
+      loadImage(src).then(img=>{ if(img) flashPool.push(img); });
+    });
+  }
+
+  function stopFlashback(){
+    clearTimeout(flashTimer);
+    flashTimer = null;
+  }
+
+  function playFlashback(){
+    preloadFlashback();
+    stopFlashback();
+    const stage = $('flashStage');
+    const text = $('flashText');
+    const counter = $('flashCounter');
+    stage.replaceChildren();
+    text.classList.remove('end');
+    text.querySelector('small').textContent = 'Kilas balik';
+    counter.innerHTML = '&nbsp;';
+
+    let i = 0;
+    let waited = 0;
+    const next = ()=>{
+      if(activeScreen !== 'sf') return;
+      // Tunggu sebentar kalau foto belum cukup terunduh (maks ± 3 detik)
+      if(i >= flashPool.length && flashPool.length < CONFIG.flashbackCount && waited < 3000){
+        waited += 150;
+        flashTimer = setTimeout(next, 150);
+        return;
+      }
+      if(i >= flashPool.length){ endFlashback(); return; }
+
+      const card = document.createElement('div');
+      card.className = 'flash-card';
+      card.style.setProperty('--r', `${(Math.random() - .5) * 18}deg`);
+      card.style.setProperty('--x', `${(Math.random() - .5) * 24}px`);
+      card.style.setProperty('--y', `${(Math.random() - .5) * 16}px`);
+      const img = document.createElement('img');
+      img.src = flashPool[i].src;
+      img.alt = '';
+      const label = document.createElement('span');
+      label.textContent = '♥';
+      card.append(img, label);
+      stage.appendChild(card);
+      while(stage.children.length > 6) stage.firstElementChild.remove();
+
+      i++;
+      counter.textContent = `Kenangan ke-${i}`;
+      const progress = i / Math.max(flashPool.length, 1);
+      flashTimer = setTimeout(next, 110 + 320 * Math.pow(progress, 4));
+    };
+    flashTimer = setTimeout(next, 500);
+  }
+
+  function endFlashback(){
+    const text = $('flashText');
+    text.classList.add('end');
+    text.querySelector('small').textContent = `${ALL_PHOTOS.length} kenangan`;
+    $('flashCounter').textContent = '…dan masih banyak cerita lagi ✨';
+    flashTimer = setTimeout(()=>{ if(activeScreen === 'sf') showScreen('s3'); }, 2200);
+  }
+
+  $('flashSkip').addEventListener('click', ()=>showScreen('s3'));
 
   /* ========================================================
      LAYAR 3: BUKU KENANGAN
@@ -806,7 +956,13 @@
   }
 
   async function loadConfiguredPhotos(){
-    photoRecords = await Promise.all(CONFIG.photos.map((photo, index)=>new Promise(resolve=>{
+    let bookList = CONFIG.bookPhotos;
+    if(CONFIG.randomBook){
+      const excluded = new Set(CONFIG.bookExclude.map(n => `${CONFIG.allPhotos.folder}foto${n}.jpg`));
+      const picks = shuffle(ALL_PHOTOS.filter(src => !excluded.has(src)));
+      bookList = CONFIG.bookPhotos.map((photo, i) => ({...photo, src: picks[i] || photo.src}));
+    }
+    photoRecords = await Promise.all(bookList.map((photo, index)=>new Promise(resolve=>{
       const image = new Image();
       image.onload = ()=>resolve({...photo, image});
       image.onerror = ()=>createFallbackImage(index).then(img=>resolve({...photo, image: img}));
@@ -969,6 +1125,21 @@
   let animationFrame = 0;
   let spinVelocity = 0;
   const raycaster = window.THREE ? new THREE.Raycaster() : null;
+  const HEART_SLOTS = 37;
+  let heartRecords = null;
+  let heartLoading = null;
+
+  /* Pilih 37 foto acak dari semua koleksi untuk menyusun hati */
+  function loadHeartPhotos(){
+    if(heartLoading) return heartLoading;
+    const picks = shuffle(ALL_PHOTOS).slice(0, HEART_SLOTS);
+    heartLoading = Promise.all(picks.map(loadImage)).then(images=>{
+      heartRecords = images.filter(Boolean).map(image=>({image, message:''}));
+      if(heartRecords.length === 0) heartRecords = photoRecords; // cadangan: pakai foto buku
+      return heartRecords;
+    });
+    return heartLoading;
+  }
 
   const isPortrait = () => window.innerWidth / window.innerHeight < .7;
 
@@ -1004,27 +1175,61 @@
     ctx.fillStyle = '#fffdfa';
     ctx.fillRect(0, 0, 512, 620);
 
+    // Foto digambar dulu ke kanvas uji. Kalau browser memblokirnya untuk WebGL
+    // (Chrome saat dibuka langsung sebagai file://), pakai kotak gradasi sebagai gantinya.
     const img = photo.image;
-    const w = img.naturalWidth || 400;
-    const h = img.naturalHeight || 400;
-    const size = Math.min(w, h);
-    try{
-      ctx.drawImage(img, (w - size) / 2, (h - size) / 2, size, size, 32, 28, 448, 448);
-    }catch(e){ /* gambar gagal digambar — biarkan kosong */ }
+    let drawn = false;
+    if(img){
+      const probe = document.createElement('canvas');
+      probe.width = probe.height = 448;
+      const pctx = probe.getContext('2d');
+      const w = img.naturalWidth || 400;
+      const h = img.naturalHeight || 400;
+      const size = Math.min(w, h);
+      try{
+        pctx.drawImage(img, (w - size) / 2, (h - size) / 2, size, size, 0, 0, 448, 448);
+        pctx.getImageData(0, 0, 1, 1);
+        ctx.drawImage(probe, 32, 28);
+        drawn = true;
+      }catch(e){
+        if(!makePhotoTexture.warned){
+          console.warn('Foto tidak bisa dipakai di hati 3D saat dibuka sebagai file://. Jalankan lewat server lokal / hosting.');
+          makePhotoTexture.warned = true;
+        }
+      }
+    }
+    if(!drawn){
+      const grad = ctx.createLinearGradient(32, 28, 480, 476);
+      grad.addColorStop(0, '#ff9aab');
+      grad.addColorStop(1, '#ff7188');
+      ctx.fillStyle = grad;
+      ctx.fillRect(32, 28, 448, 448);
+      ctx.fillStyle = 'rgba(255,255,255,.9)';
+      ctx.font = '150px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('♥', 256, 252);
+      ctx.textBaseline = 'alphabetic';
+    }
 
     ctx.strokeStyle = '#e8d2ca';
     ctx.lineWidth = 4;
     ctx.strokeRect(30, 26, 452, 452);
 
     ctx.fillStyle = '#dc637b';
-    ctx.font = 'bold 28px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText('♥', 470, 520);
-
-    ctx.fillStyle = '#4e303b';
     ctx.textAlign = 'center';
-    ctx.font = 'bold 40px Caveat, "Segoe Print", "Bradley Hand", cursive';
-    ctx.fillText(photo.message, 256, 570, 440);
+    if(photo.message){
+      ctx.font = 'bold 28px Arial';
+      ctx.textAlign = 'right';
+      ctx.fillText('♥', 470, 520);
+      ctx.fillStyle = '#4e303b';
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 40px Caveat, "Segoe Print", "Bradley Hand", cursive';
+      ctx.fillText(photo.message, 256, 570, 440);
+    }else{
+      ctx.font = 'bold 44px Arial';
+      ctx.fillText('♥', 256, 560);
+    }
 
     photo.texture = new THREE.CanvasTexture(c);
     photo.texture.encoding = THREE.sRGBEncoding;
@@ -1040,7 +1245,7 @@
     const tileSize = 0.44;
     const geometry = new THREE.PlaneGeometry(tileSize, tileSize * 1.21);
     getHeartLayout().forEach((point, index)=>{
-      const photo = photoRecords[index % photoRecords.length];
+      const photo = heartRecords[index % heartRecords.length];
       const material = new THREE.MeshBasicMaterial({map: makePhotoTexture(photo), side: THREE.DoubleSide});
       const tile = new THREE.Mesh(geometry, material);
       const dist = Math.hypot(point.x, point.y);
@@ -1204,7 +1409,12 @@
   }
 
   function start3D(){
-    if(!window.THREE || photoRecords.length === 0){
+    if(window.THREE && !heartRecords){
+      // Foto untuk hati belum selesai diunduh — tunggu, lalu mulai
+      loadHeartPhotos().then(()=>{ if(activeScreen === 's4') start3D(); });
+      return;
+    }
+    if(!window.THREE || !heartRecords || heartRecords.length === 0){
       loveScreen.classList.add('no-webgl');
       $('loveHint').textContent = 'Selamat ulang tahun! 🎂';
       return;
@@ -1398,8 +1608,9 @@
   function showPhotoPreview(photo){
     const img = $('previewModalImg');
     img.src = photo.image.src;
-    img.alt = `Foto kenangan: ${photo.message}`;
-    $('previewModalMsg').textContent = photo.message;
+    const message = photo.message || CONFIG.heartMessage;
+    img.alt = `Foto kenangan: ${message}`;
+    $('previewModalMsg').textContent = message;
     openModal(photoModal, $('closePhotoBtn'));
   }
   const closePhotoPreview = ()=>closeModal(photoModal);
