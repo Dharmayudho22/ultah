@@ -2,9 +2,12 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#171019">
 <title>Untuk Hari Istimewamu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <!-- Three.js untuk 3D Heart & Canvas Confetti untuk efek selebrasi -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -12,599 +15,437 @@
   :root{
     color-scheme:dark;
     --ink:#fff8f4;
-    --muted:#d0bdc4;
+    --muted:#d6c3ca;
     --rose:#ff7188;
+    --rose-soft:#ff9aab;
     --gold:#ffd08a;
-    --panel:rgba(35,21,31,.78);
-    --line:rgba(255,235,229,.18);
+    --panel:rgba(38,22,34,.72);
+    --line:rgba(255,235,229,.16);
+    --paper:#fffaf5;
+    --paper-2:#f6e2db;
+    --paper-ink:#3a202a;
+    --serif:'Playfair Display',Georgia,'Times New Roman',serif;
+    --sans:'DM Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+    --hand:'Caveat','Segoe Print','Bradley Hand',cursive;
   }
   *{box-sizing:border-box;}
+  html,body{height:100%;}
   body{
     min-width:320px;
-    min-height:100vh;
     margin:0;
     overflow:hidden;
-    background:radial-gradient(ellipse at 50% 110%,#642c42 0%,#281724 45%,#171019 78%);
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 115%,#6d2f47 0%,transparent 70%),
+      radial-gradient(ellipse 60% 40% at 15% 0%,rgba(255,208,138,.08) 0%,transparent 70%),
+      linear-gradient(180deg,#160e17 0%,#21131f 55%,#2a1624 100%);
     color:var(--ink);
-    font-family:Georgia,'Times New Roman',serif;
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
   }
-  button{font:inherit;}
-  #canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  button{font:inherit;-webkit-tap-highlight-color:transparent;}
+  #canvas{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    opacity:0;transition:opacity .8s ease;
+  }
+  #canvas.visible{opacity:1;}
 
-  /* Floating Music Toggle */
+  /* ===== Langit berkilau (layar 1–3) ===== */
+  .sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;transition:opacity .8s ease;}
+  body.on-love .sky{opacity:0;}
+  .sky span{
+    position:absolute;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 0 6px 1px rgba(255,208,138,.6);
+    animation:twinkle var(--d,4s) ease-in-out infinite;
+    animation-delay:var(--delay,0s);
+  }
+  .sky .petal{
+    border-radius:60% 0 60% 0;
+    background:linear-gradient(135deg,var(--rose-soft),var(--rose));
+    box-shadow:none;
+    opacity:.0;
+    animation:fall var(--d,14s) linear infinite;
+    animation-delay:var(--delay,0s);
+  }
+  @keyframes twinkle{0%,100%{opacity:.15;transform:scale(.7);}50%{opacity:.9;transform:scale(1.15);}}
+  @keyframes fall{
+    0%{opacity:0;transform:translate3d(0,-10vh,0) rotate(0deg);}
+    10%{opacity:.55;}
+    90%{opacity:.4;}
+    100%{opacity:0;transform:translate3d(var(--drift,40px),110vh,0) rotate(540deg);}
+  }
+
+  /* ===== Indikator langkah ===== */
+  .steps{
+    position:fixed;top:1.35rem;left:50%;z-index:90;
+    display:flex;gap:.45rem;transform:translateX(-50%);
+    transition:opacity .4s ease;
+  }
+  body.on-love .steps{opacity:0;pointer-events:none;}
+  .steps span{
+    width:8px;height:8px;border-radius:99px;
+    background:rgba(255,255,255,.2);
+    transition:width .35s ease,background .35s ease;
+  }
+  .steps span.done{background:rgba(255,113,136,.55);}
+  .steps span.active{width:24px;background:var(--gold);}
+
+  /* ===== Tombol musik ===== */
   .music-toggle{
-    position:fixed;
-    top:1.2rem;
-    right:1.2rem;
-    z-index:100;
-    display:flex;
-    align-items:center;
-    gap:.5rem;
-    padding:.52rem .95rem;
-    border:1px solid var(--line);
-    border-radius:30px;
-    background:rgba(35,21,31,.75);
+    position:fixed;top:1rem;right:1rem;z-index:100;
+    display:flex;align-items:center;gap:.5rem;
+    padding:.5rem .9rem;
+    border:1px solid var(--line);border-radius:30px;
+    background:rgba(35,21,31,.7);
     color:var(--ink);
-    font:700 .8rem Arial,sans-serif;
+    font:700 .78rem var(--sans);
     cursor:pointer;
-    backdrop-filter:blur(14px);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     box-shadow:0 8px 24px rgba(0,0,0,.3);
     transition:background .2s ease,border-color .2s ease,transform .2s ease;
   }
-  .music-toggle:hover{
-    background:rgba(255,113,136,.18);
-    border-color:var(--rose);
-    transform:scale(1.04);
-  }
-  .music-icon{
-    display:inline-block;
-    transition:transform .3s;
-  }
-  .music-toggle.playing .music-icon{
-    animation:spinDisc 4s linear infinite;
-  }
-  @keyframes spinDisc{
-    from{transform:rotate(0deg);}
-    to{transform:rotate(360deg);}
-  }
-  .music-waves{
-    display:flex;
-    align-items:flex-end;
-    gap:2px;
-    height:12px;
-  }
-  .music-waves span{
-    width:2px;
-    height:3px;
-    background:var(--gold);
-    border-radius:1px;
-  }
-  .music-toggle.playing .music-waves span:nth-child(1){animation:wave 1s ease-in-out infinite alternate;}
-  .music-toggle.playing .music-waves span:nth-child(2){animation:wave 1s ease-in-out infinite .3s alternate;}
-  .music-toggle.playing .music-waves span:nth-child(3){animation:wave 1s ease-in-out infinite .6s alternate;}
-  @keyframes wave{
-    0%{height:3px;}
-    100%{height:12px;}
-  }
+  .music-toggle:hover{background:rgba(255,113,136,.18);border-color:var(--rose);transform:scale(1.04);}
+  .music-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+  .music-toggle.error{border-color:#ff5a77;}
+  .music-icon{display:inline-block;}
+  .music-toggle.playing .music-icon{animation:spinDisc 4s linear infinite;}
+  @keyframes spinDisc{to{transform:rotate(360deg);}}
+  .music-waves{display:flex;align-items:flex-end;gap:2px;height:12px;}
+  .music-waves span{width:2px;height:3px;background:var(--gold);border-radius:1px;}
+  .music-toggle.playing .music-waves span{animation:wave 1s ease-in-out infinite alternate;}
+  .music-toggle.playing .music-waves span:nth-child(2){animation-delay:.3s;}
+  .music-toggle.playing .music-waves span:nth-child(3){animation-delay:.6s;}
+  @keyframes wave{to{height:12px;}}
 
+  /* ===== Layar ===== */
   .screen{
-    position:fixed;
-    inset:0;
-    z-index:1;
+    position:fixed;inset:0;z-index:1;
     display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow-y:auto;
-    padding:clamp(1rem,4vw,2.5rem);
-    transition:opacity .45s ease,visibility .45s ease;
+    overflow-x:hidden;overflow-y:auto;
+    padding:clamp(3.6rem,8vh,4.5rem) clamp(1rem,4vw,2.5rem) clamp(1.2rem,4vh,2.5rem);
+    transition:opacity .55s ease,visibility .55s ease,transform .55s ease;
   }
-  .screen.hidden{
-    visibility:hidden;
-    opacity:0;
-    pointer-events:none;
-  }
+  /* margin:auto = rata tengah tanpa memotong konten saat layar pendek */
+  .screen:not(.love-screen) > *{margin:auto;}
+  .screen.hidden{visibility:hidden;opacity:0;pointer-events:none;transform:scale(.98);}
+
   .card{
     position:relative;
-    width:min(100%,520px);
-    padding:clamp(1.5rem,5vw,3rem);
-    overflow:hidden;
+    width:min(100%,500px);
+    padding:clamp(1.75rem,5vw,3rem);
     border:1px solid var(--line);
-    border-radius:8px;
+    border-radius:20px;
     background:var(--panel);
-    box-shadow:0 24px 80px rgba(0,0,0,.3);
-    backdrop-filter:blur(18px);
+    box-shadow:0 30px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
     text-align:center;
   }
   .card::before{
-    position:absolute;
-    top:0;
-    left:12%;
-    width:76%;
-    height:1px;
+    position:absolute;top:0;left:15%;width:70%;height:1px;
     background:linear-gradient(90deg,transparent,var(--gold),transparent);
     content:"";
   }
-  .eyebrow{margin:0 0 .8rem;color:var(--gold);font:700 .72rem/1.3 Arial,sans-serif;text-transform:uppercase;letter-spacing:1px;}
-  h1{margin:0 0 1rem;font-size:clamp(2.2rem,8vw,3.8rem);font-weight:400;line-height:1.05;}
-  p{margin:0;color:var(--muted);font:1rem/1.65 Arial,sans-serif;}
-  .accent{color:var(--rose);}
-  .btn{
-    display:inline-flex;
-    min-height:46px;
-    align-items:center;
-    justify-content:center;
-    gap:.55rem;
-    margin-top:1.25rem;
-    padding:.75rem 1.25rem;
-    border:1px solid rgba(255,255,255,.18);
-    border-radius:4px;
-    background:var(--rose);
-    color:#25151c;
-    font:700 .9rem Arial,sans-serif;
-    cursor:pointer;
-    transition:background .2s ease,transform .2s ease,border-color .2s ease,box-shadow .2s ease;
-  }
-  .btn:hover:not(:disabled){
-    transform:translateY(-2px);
-    background:#ff91a1;
-    box-shadow:0 6px 18px rgba(255,113,136,.35);
-  }
-  .btn:focus-visible,.pwd-btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
-  .btn:disabled{opacity:.42;cursor:not-allowed;box-shadow:none;}
-  .btn.secondary{background:transparent;color:var(--ink);box-shadow:none;}
-  .btn.secondary:hover:not(:disabled){border-color:var(--rose);background:rgba(255,113,136,.12);box-shadow:none;}
+  .screen:not(.hidden) .card,.screen:not(.hidden) .book-container{animation:rise .7s cubic-bezier(.16,1,.3,1) both;}
+  @keyframes rise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
 
-  /* Password Grid & Wrong Shake Animation */
-  .pwd-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin:1.5rem 0 .5rem;}
+  .eyebrow{margin:0 0 .8rem;color:var(--gold);font:700 .7rem/1.3 var(--sans);text-transform:uppercase;letter-spacing:2.5px;}
+  h1{margin:0 0 1rem;font:400 clamp(2.2rem,8vw,3.5rem)/1.08 var(--serif);letter-spacing:-.5px;}
+  h1 em{font-style:italic;color:var(--rose-soft);}
+  p{margin:0;color:var(--muted);font:1rem/1.65 var(--sans);}
+  .accent{color:var(--rose);}
+
+  .gift{
+    display:inline-grid;place-items:center;
+    width:84px;height:84px;margin-bottom:1.1rem;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(255,113,136,.28) 0%,rgba(255,113,136,0) 70%);
+    font-size:2.8rem;
+    animation:bob 2.6s ease-in-out infinite;
+  }
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-8px) rotate(4deg);}}
+
+  .btn{
+    display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:.55rem;
+    margin-top:1.5rem;padding:.8rem 1.5rem;
+    border:1px solid rgba(255,255,255,.18);border-radius:999px;
+    background:linear-gradient(135deg,var(--rose-soft),var(--rose));
+    color:#2a1520;
+    font:700 .92rem var(--sans);
+    cursor:pointer;
+    box-shadow:0 8px 24px rgba(255,113,136,.3);
+    transition:transform .2s ease,box-shadow .2s ease,opacity .2s ease,background .2s ease,border-color .2s ease;
+  }
+  .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 30px rgba(255,113,136,.45);}
+  .btn:active:not(:disabled){transform:translateY(0);}
+  .btn:focus-visible,.pwd-btn:focus-visible,.modal-close:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+  .btn:disabled{opacity:.38;cursor:not-allowed;box-shadow:none;}
+  .btn.secondary{background:rgba(255,255,255,.04);color:var(--ink);box-shadow:none;}
+  .btn.secondary:hover:not(:disabled){border-color:var(--rose);background:rgba(255,113,136,.12);box-shadow:none;}
+  .btn.glow:not(:disabled){animation:glow 1.8s ease-in-out infinite;}
+  @keyframes glow{0%,100%{box-shadow:0 8px 24px rgba(255,113,136,.3);}50%{box-shadow:0 8px 40px rgba(255,208,138,.65);}}
+
+  /* ===== PIN ===== */
+  .pin-slots{display:flex;justify-content:center;gap:.5rem;margin:1.2rem 0 0;}
+  .pin-slots span{
+    display:grid;place-items:center;width:42px;height:50px;
+    border:1px solid var(--line);border-radius:10px;
+    background:rgba(255,255,255,.04);
+    font:600 1.3rem var(--serif);color:var(--gold);
+    transition:border-color .3s,background .3s;
+  }
+  .pin-slots.ok span{border-color:var(--gold);background:rgba(255,208,138,.14);}
+  .pwd-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;margin:1.4rem 0 .4rem;}
   .pwd-btn{
-    min-height:58px;
-    border:1px solid var(--line);
-    border-radius:4px;
+    min-height:56px;
+    border:1px solid var(--line);border-radius:12px;
     background:rgba(255,255,255,.045);
     color:var(--ink);
-    font:700 1.05rem Arial,sans-serif;
+    font:700 1.05rem var(--sans);letter-spacing:1px;
     cursor:pointer;
-    transition:background .2s ease,border-color .2s ease,transform .2s ease;
+    transition:background .2s ease,border-color .2s ease,transform .2s ease,opacity .2s;
   }
-  .pwd-btn:hover{transform:translateY(-2px);border-color:var(--rose);background:rgba(255,113,136,.15);}
-  .pwd-btn.wrong{
-    border-color:#ff5a77 !important;
-    background:rgba(255,90,119,.22) !important;
-    animation:shake .45s ease;
-  }
-  @keyframes shake{
-    0%,100%{transform:translateX(0);}
-    20%,60%{transform:translateX(-6px);}
-    40%,80%{transform:translateX(6px);}
-  }
-  .msg{min-height:1.5rem;margin-top:.75rem;color:var(--gold);font:700 .88rem Arial,sans-serif;}
+  .pwd-btn:hover:not(:disabled){transform:translateY(-2px);border-color:var(--rose);background:rgba(255,113,136,.15);}
+  .pwd-btn:disabled{cursor:default;opacity:.45;}
+  .pwd-btn.correct{opacity:1;border-color:var(--gold);background:rgba(255,208,138,.25);}
+  .pwd-btn.wrong{border-color:#ff5a77;background:rgba(255,90,119,.22);animation:shake .45s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
+  .msg{min-height:1.5rem;margin-top:.75rem;color:var(--gold);font:700 .88rem var(--sans);}
 
-  /* ========================================================
-     📖 BUKU ALBUM KENANGAN (SIMETRIS DUA HALAMAN & BERPASANGAN)
-     ======================================================== */
-  .book-screen{
-    flex-direction:column;
-    text-align:center;
-  }
-  .book-container{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    width:100%;
-    max-width:760px;
-    margin:0 auto;
-  }
-  .book-container h1{
-    margin-bottom:1rem;
-  }
+  /* ===== Buku kenangan ===== */
+  .book-container{display:flex;flex-direction:column;align-items:center;width:100%;max-width:760px;text-align:center;}
+  .book-container h1{margin-bottom:1.2rem;}
   .book{
     position:relative;
-    width:min(92vw, 640px);
-    height:min(56vh, 410px);
+    width:min(92vw,640px);
+    height:min(56vh,420px);
     min-height:285px;
-    perspective:1600px;
+    perspective:1800px;
     margin:0 auto 1.1rem;
-    user-select:none;
+    user-select:none;-webkit-user-select:none;
     touch-action:pan-y;
+    cursor:pointer;
   }
-
-  /* Alas Buku (Cover Kiri & Cover Kanan saat Terbuka) */
+  .book::after{
+    /* bayangan di bawah buku */
+    position:absolute;left:4%;right:4%;bottom:-18px;height:30px;
+    background:radial-gradient(ellipse at center,rgba(0,0,0,.45),transparent 70%);
+    content:"";z-index:0;
+  }
   .book-base{
-    position:absolute;
-    top:0;
-    width:50%;
-    height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border:1px solid #ebd0c7;
-    border-radius:6px;
-    background:linear-gradient(145deg, #fbf2ea, #eed7cf);
+    position:absolute;top:0;width:50%;height:100%;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid #ebd0c7;border-radius:10px;
+    background:
+      repeating-linear-gradient(0deg,rgba(150,90,100,.035) 0 1px,transparent 1px 26px),
+      linear-gradient(145deg,var(--paper),var(--paper-2));
     box-shadow:0 16px 40px rgba(0,0,0,.35);
     z-index:1;
   }
-  .book-base-left{
-    left:0;
-    border-top-right-radius:0;
-    border-bottom-right-radius:0;
-    border-right:none;
-  }
-  .book-base-right{
-    left:50%;
-    border-top-left-radius:0;
-    border-bottom-left-radius:0;
-    border-left:none;
-  }
-  .base-content{
-    padding:clamp(1rem,3vw,2rem);
-    text-align:center;
-    color:#4a2835;
-  }
-  .base-stamp{
-    font-size:clamp(1.8rem,4vw,2.4rem);
-    margin-bottom:.35rem;
-    filter:drop-shadow(0 2px 4px rgba(0,0,0,.1));
-  }
-  .base-title{
-    font:700 clamp(1rem,2.5vw,1.3rem) Georgia,serif;
-    color:#381a25;
-    margin-bottom:.25rem;
-  }
-  .base-subtitle{
-    font:700 .75rem Arial,sans-serif;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    color:#9d5f72;
-    margin-bottom:.6rem;
-  }
-  .base-desc{
-    margin:0;
-    font:italic .82rem/1.5 Arial,sans-serif;
-    color:#694b56;
-  }
+  .book-base-left{left:0;border-top-right-radius:0;border-bottom-right-radius:0;border-right:none;}
+  .book-base-right{left:50%;border-top-left-radius:0;border-bottom-left-radius:0;border-left:none;}
+  .base-content{padding:clamp(1rem,3vw,2rem);text-align:center;color:#4a2835;}
+  .base-stamp{font-size:clamp(1.8rem,4vw,2.4rem);margin-bottom:.35rem;}
+  .base-title{font:600 clamp(1.05rem,2.6vw,1.4rem)/1.2 var(--serif);color:#381a25;margin-bottom:.3rem;}
+  .base-subtitle{font:700 .7rem var(--sans);text-transform:uppercase;letter-spacing:1.5px;color:#a8566e;margin-bottom:.7rem;}
+  .base-desc{margin:0;font:600 1.12rem/1.3 var(--hand);color:#6e4b58;}
 
-  /* Garis Lipatan Tengah Buku (Spine) */
   .book-spine{
-    position:absolute;
-    top:0;
-    bottom:0;
-    left:50%;
-    width:18px;
+    position:absolute;top:0;bottom:0;left:50%;width:22px;
     transform:translateX(-50%);
-    background:linear-gradient(to right,
-      rgba(0,0,0,0.14) 0%,
-      rgba(0,0,0,0.02) 25%,
-      rgba(0,0,0,0.08) 50%,
-      rgba(0,0,0,0.02) 75%,
-      rgba(0,0,0,0.14) 100%
-    );
-    z-index:45;
-    pointer-events:none;
+    background:linear-gradient(to right,rgba(0,0,0,.16) 0%,rgba(0,0,0,.02) 30%,rgba(0,0,0,.1) 50%,rgba(0,0,0,.02) 70%,rgba(0,0,0,.16) 100%);
+    z-index:500;pointer-events:none;
   }
 
-  /* Lembaran Halaman yang Berputar */
   .page{
-    position:absolute;
-    top:0;
-    left:50%;
-    width:50%;
-    height:100%;
+    position:absolute;top:0;left:50%;width:50%;height:100%;
     transform-origin:left center;
     transform-style:preserve-3d;
-    transition:transform .8s cubic-bezier(.2,.7,.2,1);
+    transition:transform .9s cubic-bezier(.3,.7,.2,1);
   }
-  .page.flipped{
-    transform:rotateY(-180deg);
-  }
+  .page.flipped{transform:rotateY(-180deg);}
   .page-side{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    position:absolute;inset:0;
     border:1px solid #f1d8d0;
-    border-radius:0 6px 6px 0;
-    backface-visibility:hidden;
-    box-shadow:0 16px 38px rgba(0,0,0,.32);
+    border-radius:0 10px 10px 0;
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    background:
+      repeating-linear-gradient(0deg,rgba(150,90,100,.03) 0 1px,transparent 1px 26px),
+      linear-gradient(145deg,var(--paper),var(--paper-2));
+    color:var(--paper-ink);
+    box-shadow:0 16px 38px rgba(0,0,0,.3);
     overflow:hidden;
   }
-  .page-front{
-    background:linear-gradient(145deg,#fffaf5,#f3dad4);
-    color:#3a202a;
+  .page-side::after{
+    /* lekukan kertas dekat punggung buku */
+    position:absolute;top:0;bottom:0;left:0;width:16%;
+    background:linear-gradient(to right,rgba(80,30,45,.14),transparent);
+    content:"";pointer-events:none;
   }
-  .page-back{
-    background:linear-gradient(145deg,#fffaf5,#f3dad4);
-    transform:rotateY(180deg);
-    border-radius:6px 0 0 6px;
-    color:#3a202a;
-    box-shadow:-8px 16px 38px rgba(0,0,0,.32);
-  }
+  .page-back{transform:rotateY(180deg);border-radius:10px 0 0 10px;}
+  .page-back::after{left:auto;right:0;background:linear-gradient(to left,rgba(80,30,45,.14),transparent);}
 
-  /* Badge Penanda Kenangan #N */
-  .page-badge{
+  .polaroid{
     position:absolute;
-    top:9px;
-    left:12px;
-    font:700 .68rem Arial,sans-serif;
-    text-transform:uppercase;
-    letter-spacing:.6px;
-    color:#b3647b;
-    z-index:3;
-    opacity:.9;
-  }
-  .page-badge.left{
-    left:auto;
-    right:12px;
-  }
-
-  .page-photo{
-    position:absolute;
-    inset:26px 12px 64px;
-    width:calc(100% - 24px);
-    height:calc(100% - 90px);
-    background:#eadbd4;
-    object-fit:cover;
+    inset:clamp(16px,6%,30px) clamp(12px,7%,30px);
+    display:flex;flex-direction:column;
+    padding:8px 8px 0;
+    background:#fff;
     border-radius:3px;
-    box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+    box-shadow:0 6px 16px rgba(60,20,35,.18),0 1px 2px rgba(60,20,35,.12);
+    transform:rotate(var(--tilt,-1.5deg));
+  }
+  .polaroid::before{
+    /* selotip */
+    position:absolute;top:-10px;left:50%;width:64px;height:20px;
+    transform:translateX(-50%) rotate(-3deg);
+    background:rgba(255,208,138,.55);
+    box-shadow:0 1px 2px rgba(0,0,0,.08);
+    content:"";
+  }
+  .page-photo{
+    flex:1;min-height:0;width:100%;
+    object-fit:cover;
+    background:#eadbd4;
+    border-radius:2px;
   }
   .page-caption{
-    position:absolute;
-    z-index:2;
-    right:.6rem;
-    bottom:.55rem;
-    left:.6rem;
+    display:flex;align-items:center;justify-content:center;
+    min-height:3.1em;padding:.2rem .3rem;
     color:#563b45;
-    font:.84rem/1.3 'Segoe Print','Bradley Hand',cursive;
+    font:700 clamp(.95rem,2.3vw,1.2rem)/1.05 var(--hand);
     text-align:center;
   }
-  .polaroid-sticker{
-    position:absolute;
-    z-index:3;
-    top:4px;
-    right:8px;
-    color:#dc637b;
-    font:1.15rem/1 Arial,sans-serif;
-    text-shadow:0 1px 2px rgba(0,0,0,.15);
-    transform:rotate(12deg);
+  .page-badge{
+    position:absolute;bottom:6px;right:12px;z-index:3;
+    font:700 .62rem var(--sans);text-transform:uppercase;letter-spacing:1px;
+    color:#b3647b;opacity:.85;
   }
-  .polaroid-sticker.left{
-    right:auto;
-    left:8px;
-    transform:rotate(-12deg);
-  }
+  .page-back .page-badge{right:auto;left:12px;}
+  .page-note{display:flex;height:100%;align-items:center;justify-content:center;}
 
-  .book-controls{
-    display:flex;
-    justify-content:center;
-    gap:.75rem;
-    margin:.3rem 0 .2rem;
-  }
-  .page-count{
-    margin:.4rem 0 0;
-    color:var(--muted);
-    font:.85rem Arial,sans-serif;
-  }
+  .book-progress{width:min(240px,60vw);height:3px;margin:0 auto .9rem;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;}
+  .book-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--gold));transition:width .6s ease;}
+  .book-controls{display:flex;justify-content:center;gap:.75rem;}
+  .book-controls .btn{margin-top:0;}
+  .page-count{margin:.8rem 0 0;color:var(--muted);font:.85rem var(--sans);}
+  #revealHeart{margin-top:1rem;}
 
-  /* ========================================================
-     ✨ SCREEN 4: 3D LOVE SHOWCASE (BERSIH, RAPI & BEBAS TABRAKAN)
-     ======================================================== */
+  /* ===== Layar 4: Hati 3D ===== */
   .love-screen{
-    position:fixed;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    align-items:center;
-    padding:clamp(1rem, 2.5vh, 1.8rem) 1rem clamp(1.2rem, 3vh, 2rem);
-    touch-action:none;
-    cursor:grab;
-    overflow:hidden;
+    flex-direction:column;justify-content:space-between;align-items:center;
+    padding:clamp(1rem,2.5vh,1.8rem) 1rem max(clamp(1.2rem,3vh,2rem),env(safe-area-inset-bottom));
+    touch-action:none;cursor:grab;overflow:hidden;
   }
   .love-screen.is-dragging{cursor:grabbing;}
-
-  /* Header Atas - Rapi & Elegan */
-  .love-header{
-    position:relative;
-    z-index:10;
-    text-align:center;
-    pointer-events:none;
-    max-width:640px;
-    animation:fadeInDown .7s ease;
-  }
-  .love-header .eyebrow{
-    margin:0 0 .25rem;
-    font-size:.68rem;
-    letter-spacing:2px;
-  }
+  .love-screen.over-tile{cursor:pointer;}
+  .love-header{position:relative;z-index:10;max-width:640px;padding:0 4.5rem;text-align:center;pointer-events:none;}
+  .love-screen:not(.hidden) .love-header{animation:fadeInDown .9s ease both;}
+  .love-header .eyebrow{margin:0 0 .3rem;font-size:.66rem;}
   .love-header h1{
-    margin:0 0 .25rem;
-    font-size:clamp(1.4rem, 3.8vw, 2.2rem);
-    font-weight:400;
-    text-shadow:0 2px 24px rgba(255,113,136,.4);
+    margin:0 0 .3rem;
+    font-size:clamp(1.5rem,4vw,2.4rem);
+    text-shadow:0 2px 24px rgba(255,113,136,.45);
     line-height:1.15;
   }
-  .love-subtitle{
-    margin:0;
-    color:var(--gold);
-    font:italic .84rem/1.3 Georgia, serif;
-    opacity:.9;
-    text-shadow:0 1px 8px rgba(0,0,0,.6);
+  .love-subtitle{margin:0;color:var(--gold);font:italic .9rem/1.3 var(--serif);text-shadow:0 1px 8px rgba(0,0,0,.6);}
+  .love-center-space{flex:1;width:100%;display:grid;place-items:center;pointer-events:none;}
+  .heart-fallback{
+    display:none;
+    font-size:clamp(7rem,30vw,12rem);line-height:1;color:var(--rose);
+    text-shadow:0 0 40px rgba(255,113,136,.7),0 0 90px rgba(255,208,138,.35);
+    animation:beat 1.4s ease-in-out infinite;
   }
-
-  /* Area Tengah - Kosong Khusus Ruang Putar 3D Heart */
-  .love-center-space{
-    flex:1;
-    width:100%;
-    pointer-events:none;
-  }
-
-  /* Dock Bawah - Melayang Rapi Menggunakan Glassmorphism */
-  .love-dock{
-    position:relative;
-    z-index:10;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:.45rem;
-    pointer-events:auto;
-    animation:fadeInUp .7s ease;
-  }
+  .no-webgl .heart-fallback{display:block;}
+  @keyframes beat{0%,100%{transform:scale(1);}15%{transform:scale(1.12);}30%{transform:scale(1);}45%{transform:scale(1.08);}}
+  .love-dock{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:.5rem;pointer-events:auto;}
+  .love-screen:not(.hidden) .love-dock{animation:fadeInUp .9s ease .3s both;}
   .love-actions{
-    display:flex;
-    align-items:center;
-    gap:.65rem;
-    padding:.4rem .6rem;
+    display:flex;align-items:center;gap:.6rem;
+    padding:.4rem;
     border-radius:40px;
-    background:rgba(26, 14, 23, 0.76);
-    border:1px solid rgba(255, 235, 229, 0.22);
-    backdrop-filter:blur(18px);
+    background:rgba(26,14,23,.72);
+    border:1px solid rgba(255,235,229,.2);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
     box-shadow:0 12px 38px rgba(0,0,0,.5);
   }
-  .love-actions .btn{
-    margin:0;
-    min-height:42px;
-    padding:.65rem 1.15rem;
-    border-radius:30px;
-    font-size:.85rem;
-  }
-  .love-hint{
-    margin:0;
-    color:rgba(255,248,244,.65);
-    font:italic .75rem Arial, sans-serif;
-    text-shadow:0 1px 4px rgba(0,0,0,.6);
-  }
+  .love-actions .btn{margin:0;min-height:44px;padding:.65rem 1.2rem;font-size:.86rem;}
+  .love-hint{margin:0;color:rgba(255,248,244,.6);font:.74rem var(--sans);text-shadow:0 1px 4px rgba(0,0,0,.6);}
+  @keyframes fadeInDown{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:none;}}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
 
-  @keyframes fadeInDown{
-    from{opacity:0;transform:translateY(-14px);}
-    to{opacity:1;transform:translateY(0);}
-  }
-  @keyframes fadeInUp{
-    from{opacity:0;transform:translateY(14px);}
-    to{opacity:1;transform:translateY(0);}
-  }
-
-  /* Modals: Letter & Photo Preview */
+  /* ===== Modal ===== */
   .modal-overlay{
-    position:fixed;
-    inset:0;
-    z-index:120;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:1.2rem;
-    background:rgba(15,8,15,.75);
-    backdrop-filter:blur(10px);
+    position:fixed;inset:0;z-index:120;
+    display:flex;padding:1.2rem;overflow-y:auto;
+    background:rgba(15,8,15,.72);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
     transition:opacity .35s ease,visibility .35s ease;
   }
-  .modal-overlay.hidden{
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-  }
+  .modal-overlay > *{margin:auto;}
+  .modal-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none;}
   .modal-card{
     position:relative;
     width:min(100%,540px);
-    max-height:88vh;
-    overflow-y:auto;
-    padding:clamp(1.5rem,5vw,2.5rem);
-    border-radius:12px;
-    background:linear-gradient(170deg,#fffdfa 0%,#fbf3ec 100%);
+    padding:clamp(1.75rem,5vw,2.75rem);
+    border-radius:18px;
+    background:
+      repeating-linear-gradient(0deg,rgba(180,120,130,.07) 0 1px,transparent 1px 30px),
+      linear-gradient(170deg,#fffdfa 0%,#fbf1ea 100%);
     color:#351e27;
-    box-shadow:0 30px 90px rgba(0,0,0,.5);
+    box-shadow:0 30px 90px rgba(0,0,0,.55);
     text-align:center;
-    animation:modalPop .35s cubic-bezier(.16,1,.3,1);
   }
-  @keyframes modalPop{
-    from{transform:scale(.92) translateY(12px);opacity:0;}
-    to{transform:scale(1) translateY(0);opacity:1;}
-  }
+  .modal-overlay:not(.hidden) .modal-card{animation:modalPop .45s cubic-bezier(.16,1,.3,1);}
+  @keyframes modalPop{from{transform:scale(.92) translateY(14px);opacity:0;}to{transform:none;opacity:1;}}
   .modal-close{
-    position:absolute;
-    top:12px;
-    right:16px;
+    position:absolute;top:10px;right:12px;
+    width:40px;height:40px;
+    border:none;border-radius:50%;
     background:transparent;
-    border:none;
-    font-size:1.8rem;
-    color:#8e6473;
-    cursor:pointer;
-    line-height:1;
-    transition:color .2s;
+    font-size:1.7rem;line-height:1;color:#8e6473;
+    cursor:pointer;transition:color .2s,background .2s;
   }
-  .modal-close:hover{color:#dc3557;}
-  .letter-stamp{
-    font-size:2.2rem;
-    margin-bottom:.25rem;
-    filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));
-  }
-  .letter-title{
-    font-family:Georgia,serif;
-    font-size:clamp(1.4rem,4vw,1.9rem);
-    font-weight:400;
-    color:#3a1824;
-    margin:0 0 .8rem;
-  }
+  .modal-close:hover{color:#dc3557;background:rgba(220,53,87,.08);}
+  .letter-stamp{font-size:2.3rem;margin-bottom:.3rem;}
+  .letter-modal .eyebrow{color:#b2637a;}
+  .letter-title{font:400 clamp(1.5rem,4.5vw,2rem)/1.2 var(--serif);color:#3a1824;margin:0 0 1rem;}
   .letter-body{
-    color:#4e323d;
-    font:1rem/1.8 Arial,sans-serif;
-    text-align:left;
-    white-space:pre-wrap;
-    min-height:100px;
-    padding:0 .25rem;
+    min-height:120px;padding:0 .25rem;
+    color:#4e323d;font:400 1rem/1.85 var(--sans);
+    text-align:left;white-space:pre-wrap;
+    cursor:default;
   }
-  .letter-footer{
-    margin-top:1.5rem;
-    padding-top:1rem;
-    border-top:1px dashed #e4c9c1;
-    text-align:center;
-  }
-  .letter-signature{
-    margin:0;
-    color:#6b4754;
-    font:italic 1rem/1.5 Georgia,serif;
-  }
-
-  /* Photo Preview Modal Card */
-  .photo-modal-card{
-    width:min(90%,360px);
-    padding:1.2rem;
-    background:#fffaf6;
-    border-radius:8px;
-    box-shadow:0 24px 60px rgba(0,0,0,.6);
-  }
-  .preview-img{
-    width:100%;
-    aspect-ratio:1/1;
-    object-fit:cover;
-    border-radius:4px;
-    background:#eadbd4;
-    border:1px solid #e7c9c0;
-    display:block;
-  }
-  .preview-msg{
-    margin:.85rem 0 .2rem;
-    color:#563b45;
-    font:1.05rem/1.4 'Segoe Print','Bradley Hand',cursive;
-    text-align:center;
-  }
+  .letter-body.typing::after{content:"▍";margin-left:1px;color:var(--rose);animation:blink .8s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .skip-hint{margin-top:.6rem;color:#a07c88;font:.75rem var(--sans);transition:opacity .3s;}
+  .skip-hint.gone{opacity:0;}
+  .letter-footer{margin-top:1.4rem;padding-top:1.1rem;border-top:1px dashed #e4c9c1;}
+  .letter-signature{margin:0;color:#6b4754;font:700 1.35rem/1.3 var(--hand);}
+  .letter-signature small{display:block;color:#9b7784;font:italic .9rem var(--serif);}
+  .photo-modal-card{width:min(92vw,380px);padding:1rem 1rem .4rem;background:#fff;border-radius:6px;transform:rotate(-1deg);}
+  .photo-modal-card .modal-close{top:-16px;right:-16px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.25);}
+  .preview-img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:2px;background:#eadbd4;}
+  .preview-msg{margin:.6rem 0 .5rem;color:#563b45;font:700 1.45rem/1.2 var(--hand);}
 
   @media(max-width:480px){
-    .screen{padding:.8rem .5rem;}
-    .book{width:min(96vw,390px);height:265px;min-height:245px;}
-    .page-photo{inset:22px 6px 48px;width:calc(100% - 12px);height:calc(100% - 70px);}
-    .page-caption{font-size:.7rem;bottom:.35rem;line-height:1.2;}
-    .page-badge{font-size:.6rem;top:6px;left:8px;}
-    .page-badge.left{right:8px;left:auto;}
-    .polaroid-sticker{font-size:.9rem;top:2px;right:4px;}
-    .polaroid-sticker.left{left:4px;right:auto;}
-    .base-title{font-size:.95rem;}
-    .base-subtitle{font-size:.68rem;}
-    .base-desc{font-size:.72rem;}
-    .book-controls{gap:.4rem;}
-    .book-controls .btn{padding:.6rem .8rem;font-size:.82rem;min-height:40px;}
-    .music-toggle{top:.8rem;right:.8rem;padding:.4rem .7rem;}
-    .love-actions{padding:.3rem .45rem;gap:.45rem;}
-    .love-actions .btn{padding:.55rem .9rem;font-size:.8rem;min-height:38px;}
+    .screen{padding-left:.75rem;padding-right:.75rem;}
+    .book{width:min(96vw,400px);height:min(52vh,300px);min-height:250px;}
+    .polaroid{inset:14px 8px;padding:5px 5px 0;}
+    .polaroid::before{width:44px;height:14px;top:-7px;}
+    .page-caption{font-size:.92rem;min-height:2.8em;}
+    .page-badge{font-size:.55rem;bottom:3px;}
+    .base-title{font-size:.98rem;}
+    .base-subtitle{font-size:.6rem;letter-spacing:1px;}
+    .base-desc{font-size:.95rem;}
+    .book-controls{gap:.5rem;}
+    .book-controls .btn{padding:.6rem .95rem;font-size:.82rem;min-height:42px;}
+    .music-toggle{top:.8rem;right:.8rem;padding:.42rem .7rem;}
+    .music-text{display:none;}
+    .steps{top:1.2rem;}
+    .love-header{padding:0 2.5rem;}
+    .love-actions .btn{padding:.55rem .9rem;font-size:.8rem;min-height:40px;}
+    .pin-slots span{width:38px;height:46px;}
   }
   @media(prefers-reduced-motion:reduce){
     *,*::before,*::after{
@@ -613,19 +454,20 @@
       animation-duration:.01ms!important;
       animation-iteration-count:1!important;
     }
+    .sky{display:none;}
   }
 </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
+<canvas id="canvas" aria-hidden="true"></canvas>
+<div class="sky" id="sky" aria-hidden="true"></div>
 
-<!-- Floating Music Player Control -->
-<button class="music-toggle" id="musicToggle" type="button" aria-label="Nyalakan / Matikan Musik" title="Musik Latar">
-  <span class="music-icon">🎵</span>
+<div class="steps" id="steps" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+<button class="music-toggle" id="musicToggle" type="button" aria-label="Nyalakan atau matikan musik" aria-pressed="false" title="Musik latar">
+  <span class="music-icon" aria-hidden="true">🎵</span>
   <span class="music-text">Musik</span>
-  <span class="music-waves" aria-hidden="true">
-    <span></span><span></span><span></span>
-  </span>
+  <span class="music-waves" aria-hidden="true"><span></span><span></span><span></span></span>
 </button>
 <audio id="bgMusic" loop preload="auto">
   <source src="music.mp3" type="audio/mpeg">
@@ -633,33 +475,36 @@
 </audio>
 
 <main>
-<!-- Screen 1: Welcome -->
+<!-- Layar 1: Sambutan -->
 <section class="screen" id="s1" aria-labelledby="welcome-title">
   <div class="card">
+    <div class="gift" aria-hidden="true">🎁</div>
     <p class="eyebrow">Hari yang spesial</p>
-    <h1 id="welcome-title">Selamat datang<span class="accent">.</span></h1>
-    <p>Sebuah hadiah kecil untukmu. Klik tombol di bawah untuk membuka.</p>
+    <h1 id="welcome-title">Hai, <em data-name>kamu</em><span class="accent">.</span></h1>
+    <p>Ada sebuah hadiah kecil yang sudah lama disiapkan untukmu. Siap membukanya?</p>
     <button class="btn" id="startBtn" type="button" data-go="s2">Buka hadiah <span aria-hidden="true">&#8594;</span></button>
   </div>
 </section>
 
-<!-- Screen 2: Password / Birthday PIN -->
+<!-- Layar 2: Kata sandi -->
 <section class="screen hidden" id="s2" aria-labelledby="password-title" aria-hidden="true">
   <div class="card">
     <p class="eyebrow">Satu petunjuk kecil</p>
     <h1 id="password-title">Kata sandi<span class="accent">.</span></h1>
-    <p>Pilih tanggal ulang tahunmu (4 digit: DDMM)</p>
-    <div class="pwd-grid" id="pwdGrid" aria-label="Pilihan kata sandi"></div>
+    <p>Pilih tanggal &amp; bulan lahirmu<br><small style="opacity:.7">(format DDMM)</small></p>
+    <div class="pin-slots" id="pinSlots" aria-hidden="true"><span>•</span><span>•</span><span>•</span><span>•</span></div>
+    <div class="pwd-grid" id="pwdGrid" role="group" aria-label="Pilihan kata sandi"></div>
     <div class="msg" id="pwdMsg" role="status" aria-live="polite"></div>
   </div>
 </section>
 
-<!-- Screen 3: Flip Memory Book (Simetris 2 Halaman Polaroid) -->
-<section class="screen hidden book-screen" id="s3" aria-labelledby="memories-title" aria-hidden="true">
+<!-- Layar 3: Buku kenangan -->
+<section class="screen hidden" id="s3" aria-labelledby="memories-title" aria-hidden="true">
   <div class="book-container">
     <p class="eyebrow">Dibuka satu per satu</p>
     <h1 id="memories-title">Kenangan<span class="accent">.</span></h1>
-    <div class="book" id="book"></div>
+    <div class="book" id="book" aria-label="Album kenangan. Ketuk sisi kanan untuk lanjut, sisi kiri untuk kembali."></div>
+    <div class="book-progress" aria-hidden="true"><span id="bookProgress"></span></div>
     <div class="book-controls">
       <button class="btn secondary" id="prevPage" type="button" aria-label="Halaman sebelumnya">&#8592; Sebelumnya</button>
       <button class="btn secondary" id="nextPage" type="button" aria-label="Halaman berikutnya">Berikutnya &#8594;</button>
@@ -669,64 +514,63 @@
   </div>
 </section>
 
-<!-- Screen 4: 3D Heart & Celebration (Bebas Tabrakan) -->
+<!-- Layar 4: Hati 3D -->
 <section class="screen hidden love-screen" id="s4" aria-labelledby="love-title" aria-hidden="true">
-  <!-- Header di Bagian Atas -->
   <div class="love-header">
     <p class="eyebrow">Dari hati</p>
     <h1 id="love-title">Untukmu, dengan cinta <span class="accent">&#10084;</span></h1>
-    <p class="love-subtitle">Sebuah bentuk cinta yang tersusun dari kenangan kita ✨</p>
+    <p class="love-subtitle">Sebuah hati yang tersusun dari kenangan kita ✨</p>
   </div>
-
-  <!-- Area Tengah Kosong (Khusus untuk visual 3D Heart) -->
-  <div class="love-center-space" aria-hidden="true"></div>
-
-  <!-- Dock Navigasi Melayang di Bagian Bawah -->
+  <div class="love-center-space" aria-hidden="true"><div class="heart-fallback">&#10084;</div></div>
   <div class="love-dock">
     <div class="love-actions">
-      <button class="btn" id="openLetterBtn" type="button">Buka Surat Untukmu ✉️</button>
-      <button class="btn secondary" id="backToBookBtn" type="button">&#8592; Lihat Kenangan</button>
+      <button class="btn glow" id="openLetterBtn" type="button">Buka surat ✉️</button>
+      <button class="btn secondary" id="backToBookBtn" type="button">&#8592; Kenangan</button>
     </div>
-    <p class="love-hint">Sentuh & putar hati 3D • Ketuk foto untuk memperbesar</p>
+    <p class="love-hint" id="loveHint">Geser untuk memutar hati • Ketuk foto untuk memperbesar</p>
   </div>
 </section>
 </main>
 
-<!-- Modal: Surat Ucapan Spesial (Typewriter Effect) -->
-<div class="modal-overlay hidden" id="letterModal" role="dialog" aria-modal="true" aria-labelledby="letterTitle">
+<!-- Modal: Surat -->
+<div class="modal-overlay hidden letter-modal" id="letterModal" role="dialog" aria-modal="true" aria-labelledby="letterTitle" aria-hidden="true">
   <div class="modal-card">
     <button class="modal-close" id="closeLetterBtn" type="button" aria-label="Tutup surat">&times;</button>
-    <div class="letter-stamp">💌</div>
-    <p class="eyebrow" style="color:#b2637a;">Surat Spesial</p>
+    <div class="letter-stamp" aria-hidden="true">💌</div>
+    <p class="eyebrow">Surat spesial</p>
     <h2 class="letter-title" id="letterTitle"></h2>
     <div class="letter-body" id="letterBody"></div>
+    <p class="skip-hint" id="skipHint">Ketuk surat untuk menampilkan semuanya</p>
     <div class="letter-footer">
-      <p class="letter-signature">Dengan segenap doa & rasa,<br><strong>Untukmu yang terbaik ❤️</strong></p>
-      <button class="btn" id="doneLetterBtn" type="button" style="margin-top:1.2rem;">Tutup & Nikmati Momen</button>
+      <p class="letter-signature"><small>Dengan segenap doa &amp; rasa,</small><span id="letterSignature"></span></p>
+      <button class="btn" id="doneLetterBtn" type="button">Tutup &amp; nikmati momen</button>
     </div>
   </div>
 </div>
 
-<!-- Modal: Preview Foto Polaroid saat Tile di 3D Heart Diklik -->
-<div class="modal-overlay hidden" id="photoModal" role="dialog" aria-modal="true" aria-label="Preview Foto">
+<!-- Modal: Preview foto -->
+<div class="modal-overlay hidden" id="photoModal" role="dialog" aria-modal="true" aria-label="Preview foto" aria-hidden="true">
   <div class="modal-card photo-modal-card">
     <button class="modal-close" id="closePhotoBtn" type="button" aria-label="Tutup">&times;</button>
-    <img id="previewModalImg" class="preview-img" src="" alt="Foto Kenangan">
+    <img id="previewModalImg" class="preview-img" src="data:," alt="">
     <p id="previewModalMsg" class="preview-msg"></p>
   </div>
 </div>
 
 <script>
   /* ========================================================
-     ⚙️ KONFIGURASI UTAMA (BISA KAMU UBAH SESUAI KEINGINAN)
+     ⚙️ KONFIGURASI UTAMA (UBAH SESUAI KEINGINAN)
      ======================================================== */
   const CONFIG = {
-    recipientName: 'Bocil',
-    password: '1708', // Tanggal ulang tahun format DDMM
+    recipientName: 'Aurel Novelina',
+    password: '0811', // Tanggal ulang tahun format DDMM (8 November)
     letter: {
-      title: 'Selamat Ulang Tahun, Bocil! ✨',
-      content: 'Di hari yang begitu spesial ini, aku ingin mengucapkan terima kasih sudah selalu hadir dan membawa senyum serta tawa.\n\nSemoga di usiamu yang baru ini, setiap langkahmu dipenuhi kebahagiaan, kesehatan, tercapai semua impianmu, dan selalu dikelilingi hal-hal baik.\n\nTetaplah jadi dirimu yang hangat, ceria, dan luar biasa seperti ini.\n\nHappy Birthday! ❤️'
+      title: 'Selamat Ulang Tahun, Aurel Novelina! ✨',
+      content: 'Di hari yang begitu spesial ini, aku ingin mengucapkan terima kasih sudah selalu hadir dan membawa senyum serta tawa.\n\nSemoga di usiamu yang baru ini, setiap langkahmu dipenuhi kebahagiaan, kesehatan, tercapai semua impianmu, dan selalu dikelilingi hal-hal baik.\n\nTetaplah jadi dirimu yang hangat, ceria, dan luar biasa seperti ini.\n\nTak akan lelah aku mengucap syukur,\nkarena hadirmu, bahagiaku tak terukur.\nBukan fatamorgana, tapi ini nyata,\nterima kasih untuk anugerah yang luar biasa.\n\nHappy Birthday! ❤️',
+      signature: 'Untukmu yang terbaik ❤️'
     },
+    // Taruh file foto di folder yang sama dengan index.html.
+    // Kalau foto tidak ditemukan, otomatis diganti kartu warna-warni.
     photos: [
       {src:'foto_uji_coba.png',message:'Semoga harimu seindah senyummu'},
       {src:'foto_uji_coba.png',message:'Terima kasih sudah hadir'},
@@ -739,308 +583,395 @@
     ]
   };
 
+  const $ = id => document.getElementById(id);
+  const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('[data-name]').forEach(el => el.textContent = CONFIG.recipientName);
+  $('letterSignature').textContent = CONFIG.letter.signature;
+
   /* ========================================================
-     🎵 AUDIO & MUSIC CONTROLLER
+     ✨ LANGIT BERKILAU (dekorasi latar layar 1–3)
      ======================================================== */
-  const musicToggle = document.getElementById('musicToggle');
-  const bgMusic = document.getElementById('bgMusic');
+  (function buildSky(){
+    if(reduceMotion) return;
+    const sky = $('sky');
+    const frag = document.createDocumentFragment();
+    for(let i = 0; i < 40; i++){
+      const s = document.createElement('span');
+      const size = 1 + Math.random() * 2.2;
+      s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;--d:${3+Math.random()*4}s;--delay:${-Math.random()*6}s`;
+      frag.appendChild(s);
+    }
+    for(let i = 0; i < 12; i++){
+      const p = document.createElement('span');
+      p.className = 'petal';
+      const size = 8 + Math.random() * 8;
+      p.style.cssText = `left:${Math.random()*100}%;top:0;width:${size}px;height:${size}px;--d:${12+Math.random()*10}s;--delay:${-Math.random()*20}s;--drift:${(Math.random()-.5)*160}px`;
+      frag.appendChild(p);
+    }
+    sky.appendChild(frag);
+  })();
+
+  /* ========================================================
+     🎵 MUSIK
+     ======================================================== */
+  const musicToggle = $('musicToggle');
+  const bgMusic = $('bgMusic');
   let musicStarted = false;
 
-  function tryPlayMusic(){
-    if(!musicStarted && bgMusic){
-      bgMusic.play().then(()=>{
-        musicStarted = true;
-        musicToggle.classList.add('playing');
-      }).catch(()=>{
-        // Autoplay terblokir browser; user dapat menekan tombol musik kapan saja
-      });
-    }
+  function setMusicUI(playing){
+    musicToggle.classList.toggle('playing', playing);
+    musicToggle.setAttribute('aria-pressed', String(playing));
   }
-
-  musicToggle.addEventListener('click', (e)=>{
+  function playMusic(){
+    return bgMusic.play().then(()=>{
+      musicStarted = true;
+      musicToggle.classList.remove('error');
+      setMusicUI(true);
+    });
+  }
+  function tryPlayMusic(){
+    if(!musicStarted) playMusic().catch(()=>{ /* autoplay diblokir — user bisa tekan tombol musik */ });
+  }
+  musicToggle.addEventListener('click', e=>{
     e.stopPropagation();
     if(bgMusic.paused){
-      bgMusic.play().then(()=>{
-        musicStarted = true;
-        musicToggle.classList.add('playing');
-      }).catch(err => console.log('Audio error:', err));
+      playMusic().catch(()=>{
+        musicToggle.classList.add('error');
+        musicToggle.title = 'Musik tidak dapat diputar';
+      });
     }else{
       bgMusic.pause();
-      musicToggle.classList.remove('playing');
+      setMusicUI(false);
     }
   });
 
   /* ========================================================
-     🎉 CONFETTI EFFECT HELPER
+     🎉 CONFETTI
      ======================================================== */
+  const confettiColors = ['#ff7188','#ffd08a','#ffffff','#ff91a1','#e85a71'];
   function launchConfetti(originY = 0.6){
-    if(window.confetti){
-      window.confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: originY },
-        colors: ['#ff7188', '#ffd08a', '#ffffff', '#ff91a1', '#e85a71']
-      });
-    }
+    if(!window.confetti || reduceMotion) return;
+    window.confetti({particleCount:90, spread:75, origin:{y:originY}, colors:confettiColors});
+  }
+  function bigCelebration(){
+    if(!window.confetti || reduceMotion) return;
+    const end = performance.now() + 1600;
+    (function frame(){
+      window.confetti({particleCount:4, angle:60, spread:60, origin:{x:0, y:.7}, colors:confettiColors});
+      window.confetti({particleCount:4, angle:120, spread:60, origin:{x:1, y:.7}, colors:confettiColors});
+      if(performance.now() < end) requestAnimationFrame(frame);
+    })();
   }
 
   /* ========================================================
-     NAVIGATION & SCREEN SWITCHER
+     NAVIGASI ANTAR LAYAR
      ======================================================== */
   const screens = document.querySelectorAll('.screen');
-  const passwordGrid = document.getElementById('pwdGrid');
-  const passwordMessage = document.getElementById('pwdMsg');
-  const revealHeart = document.getElementById('revealHeart');
-  const book = document.getElementById('book');
-  const pageCount = document.getElementById('pageCount');
-  const loveScreen = document.getElementById('s4');
-  const pageElements = [];
-
-  let photoRecords = [];
-  let currentPage = 0;
-  let scene, camera, renderer, heartGroup, starField, starGeometry, starMaterial;
-  let starStartPositions, starTargetPositions;
-  let ambientStarField, ambientStarGeometry;
-  let floatingStarSprites = [];
-  let floatingHeartSprites = [];
-  let floatingDecorationGroup;
-  let transitionStarted = 0;
-  let revealProgress = 0;
-  let isDraggingHeart = false;
-  let lastPointer = null;
-  let pointerDownPos = null;
-  let animationFrame = 0;
+  const stepDots = document.querySelectorAll('#steps span');
+  const passwordGrid = $('pwdGrid');
+  const passwordMessage = $('pwdMsg');
+  const revealHeart = $('revealHeart');
+  const book = $('book');
+  const pageCount = $('pageCount');
+  const loveScreen = $('s4');
+  const glCanvas = $('canvas');
+  let activeScreen = 's1';
 
   function showScreen(id){
     tryPlayMusic();
+    activeScreen = id;
+    const stepIndex = Number(id.slice(1)) - 1;
     screens.forEach(screen=>{
       const active = screen.id === id;
       screen.classList.toggle('hidden', !active);
       screen.setAttribute('aria-hidden', String(!active));
+      if('inert' in screen) screen.inert = !active;
     });
+    stepDots.forEach((dot, i)=>{
+      dot.classList.toggle('active', i === stepIndex);
+      dot.classList.toggle('done', i < stepIndex);
+    });
+    document.body.classList.toggle('on-love', id === 's4');
+
     if(id === 's4'){
       start3D();
       launchConfetti(0.35);
-      setTimeout(()=>launchConfetti(0.55), 700);
-    } else {
+      setTimeout(bigCelebration, 600);
+    }else{
       stop3D();
     }
+
+    // Pindahkan fokus ke tombol utama layar baru (untuk keyboard/pembaca layar)
+    const target = document.querySelector(`#${id} .btn:not(:disabled), #${id} .pwd-btn`);
+    if(target) setTimeout(()=>target.focus({preventScroll:true}), 400);
   }
 
   document.querySelectorAll('[data-go]').forEach(button=>{
     button.addEventListener('click', ()=>showScreen(button.dataset.go));
   });
+  screens.forEach(s => { if('inert' in s) s.inert = s.id !== 's1'; });
+  stepDots[0].classList.add('active');
 
   /* ========================================================
-     SCREEN 2: PASSWORD / PIN SYSTEM
+     LAYAR 2: KATA SANDI
      ======================================================== */
-  const choices = [CONFIG.password, '1234', '9999', '0000', '2024', '1111', '5678', '4321'];
-  for(let index = choices.length - 1; index > 0; index--){
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [choices[index], choices[randomIndex]] = [choices[randomIndex], choices[index]];
-  }
+  (function buildPasswordGrid(){
+    const decoys = ['1234','9999','0000','2512','1111','0102','1402','3112','0505','2024'];
+    const choices = [CONFIG.password, ...decoys.filter(d => d !== CONFIG.password).slice(0, 7)];
+    for(let i = choices.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+    const slots = $('pinSlots');
+    let wrongCount = 0;
 
-  choices.forEach(value=>{
-    const button = document.createElement('button');
-    button.className = 'pwd-btn';
-    button.type = 'button';
-    button.textContent = value;
-    button.addEventListener('click', ()=>{
-      tryPlayMusic();
-      if(value === CONFIG.password){
-        launchConfetti(0.5);
-        button.style.borderColor = 'var(--gold)';
-        button.style.background = 'rgba(255,208,138,.25)';
-        passwordMessage.textContent = 'Tepat! Hadiahmu terbuka 🎉';
-        passwordGrid.querySelectorAll('button').forEach(option => option.disabled = true);
-        window.setTimeout(()=>showScreen('s3'), 750);
-      }else{
-        button.classList.add('wrong');
-        window.setTimeout(()=>button.classList.remove('wrong'), 500);
-        passwordMessage.textContent = 'Belum tepat. Coba satu pilihan lagi 😊';
-      }
+    choices.forEach(value=>{
+      const button = document.createElement('button');
+      button.className = 'pwd-btn';
+      button.type = 'button';
+      button.textContent = value;
+      button.addEventListener('click', ()=>{
+        tryPlayMusic();
+        if(value === CONFIG.password){
+          [...slots.children].forEach((slot, i)=>{
+            setTimeout(()=>{ slot.textContent = value[i] || '•'; }, i * 110);
+          });
+          setTimeout(()=>slots.classList.add('ok'), 450);
+          button.classList.add('correct');
+          launchConfetti(0.5);
+          passwordMessage.textContent = 'Tepat! Hadiahmu terbuka 🎉';
+          passwordGrid.querySelectorAll('button').forEach(b => b.disabled = true);
+          setTimeout(()=>showScreen('s3'), 1100);
+        }else{
+          wrongCount++;
+          button.classList.remove('wrong');
+          void button.offsetWidth; // restart animasi goyang
+          button.classList.add('wrong');
+          setTimeout(()=>button.classList.remove('wrong'), 500);
+          passwordMessage.textContent = wrongCount >= 3
+            ? `Petunjuk: tanggal ${Number(CONFIG.password.slice(0,2))}, bulan ke-${Number(CONFIG.password.slice(2))} 😉`
+            : 'Belum tepat. Coba lagi ya 😊';
+        }
+      });
+      passwordGrid.appendChild(button);
     });
-    passwordGrid.appendChild(button);
-  });
+  })();
 
   /* ========================================================
-     SCREEN 3: FLIPBOOK KENANGAN SIMETRIS DUA SISI POLAROID
+     LAYAR 3: BUKU KENANGAN
+     Setiap lembar punya 2 sisi: depan = foto ganjil, belakang = foto genap,
+     jadi tidak ada foto yang tampil dobel.
      ======================================================== */
-  function createFallbackImage(caption){
+  let photoRecords = [];
+  let sheets = [];
+  let currentPage = 0;
+  let flipCounter = 0;
+
+  const fallbackPalettes = [
+    ['#ff9aab','#ff7188'],['#ffd08a','#ff9a7a'],['#c9a7ff','#ff8fb1'],['#8fd8c9','#7aa8ff'],
+    ['#ffb38a','#ff6f91'],['#a7c7ff','#c08aff'],['#ffc6d3','#ff8fa3'],['#ffe29a','#ffb36b']
+  ];
+  function createFallbackImage(index){
     const c = document.createElement('canvas');
-    c.width = 400;
-    c.height = 400;
+    c.width = c.height = 600;
     const ctx = c.getContext('2d');
-    const grad = ctx.createLinearGradient(0, 0, 400, 400);
-    grad.addColorStop(0, '#ff91a1');
-    grad.addColorStop(1, '#ff7188');
+    const [a, b] = fallbackPalettes[index % fallbackPalettes.length];
+    const grad = ctx.createLinearGradient(0, 0, 600, 600);
+    grad.addColorStop(0, a);
+    grad.addColorStop(1, b);
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 400, 400);
-    ctx.fillStyle = '#fff8f4';
-    ctx.font = '80px Arial';
+    ctx.fillRect(0, 0, 600, 600);
+    // bokeh lembut
+    for(let i = 0; i < 14; i++){
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(255,255,255,${0.06 + Math.random()*0.12})`;
+      ctx.arc(Math.random()*600, Math.random()*600, 20 + Math.random()*70, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,.95)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('♥', 200, 200);
-    const img = new Image();
-    img.src = c.toDataURL();
-    return img;
+    ctx.font = '180px Georgia, serif';
+    ctx.fillText('♥', 300, 280);
+    ctx.font = 'bold 34px Arial, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.fillText(`#${index + 1}`, 300, 450);
+    return new Promise(resolve=>{
+      const img = new Image();
+      img.onload = ()=>resolve(img);
+      img.src = c.toDataURL('image/jpeg', .9);
+    });
   }
 
   async function loadConfiguredPhotos(){
-    const loadedPhotos = await Promise.all(CONFIG.photos.map(photo=>new Promise(resolve=>{
+    photoRecords = await Promise.all(CONFIG.photos.map((photo, index)=>new Promise(resolve=>{
       const image = new Image();
       image.onload = ()=>resolve({...photo, image});
-      image.onerror = ()=>resolve({...photo, image: createFallbackImage(photo.message)});
+      image.onerror = ()=>createFallbackImage(index).then(img=>resolve({...photo, image: img}));
       image.src = photo.src;
     })));
-    photoRecords = loadedPhotos.filter(Boolean);
     renderBook();
+  }
+
+  function polaroidHTML(photo, index){
+    const tilt = (index % 2 ? 1.6 : -1.4) + (Math.random() - .5);
+    const msg = escapeHTML(photo.message);
+    return `
+      <div class="polaroid" style="--tilt:${tilt.toFixed(2)}deg">
+        <img class="page-photo" src="${photo.image.src}" alt="Foto kenangan ${index + 1}: ${msg}" draggable="false">
+        <span class="page-caption">${msg}</span>
+      </div>
+      <span class="page-badge">Memori #${index + 1}</span>`;
   }
 
   function renderBook(){
     book.replaceChildren();
-    pageElements.length = 0;
+    sheets = [];
     currentPage = 0;
+    const name = escapeHTML(CONFIG.recipientName);
 
-    // 1. Alas Kiri Buku (Cover pembuka)
     const baseLeft = document.createElement('div');
     baseLeft.className = 'book-base book-base-left';
     baseLeft.innerHTML = `
       <div class="base-content">
-        <div class="base-stamp">📖</div>
+        <div class="base-stamp" aria-hidden="true">📖</div>
         <div class="base-title">Album Kenangan</div>
-        <div class="base-subtitle">Untuk ${CONFIG.recipientName} 💕</div>
-        <p class="base-desc">Buka lembar demi lembar<br>setiap memori indah kita...</p>
-      </div>
-    `;
-    book.appendChild(baseLeft);
+        <div class="base-subtitle">Untuk ${name} 💕</div>
+        <p class="base-desc">Buka lembar demi lembar<br>setiap memori indah kita…</p>
+      </div>`;
 
-    // 2. Alas Kanan Buku (Halaman penutup saat semua foto selesai dibuka)
     const baseRight = document.createElement('div');
     baseRight.className = 'book-base book-base-right';
     baseRight.innerHTML = `
       <div class="base-content">
-        <div class="base-stamp">✨</div>
-        <div class="base-title">Kenangan Indah</div>
-        <div class="base-subtitle">Semua lembaran terbuka!</div>
-        <p class="base-desc">Setiap momen bersamamu begitu berarti.<br>Klik tombol kejutan di bawah ❤️</p>
-      </div>
-    `;
-    book.appendChild(baseRight);
+        <div class="base-stamp" aria-hidden="true">✨</div>
+        <div class="base-title">Bersambung…</div>
+        <div class="base-subtitle">Semua lembar terbuka</div>
+        <p class="base-desc">Masih banyak cerita indah<br>yang akan kita tulis ❤️</p>
+      </div>`;
 
-    // 3. Garis Lipatan Tengah (Spine)
     const spine = document.createElement('div');
     spine.className = 'book-spine';
-    spine.setAttribute('aria-hidden', 'true');
-    book.appendChild(spine);
+    book.append(baseLeft, baseRight, spine);
 
-    if(photoRecords.length > 0){
-      photoRecords.forEach((photo, index)=>{
-        const page = document.createElement('div');
-        page.className = 'page';
-        page.style.zIndex = String(20 - index);
-        page.setAttribute('aria-label', `Foto kenangan ${index + 1}`);
+    for(let i = 0; i < photoRecords.length; i += 2){
+      const sheetIndex = i / 2;
+      const sheet = document.createElement('div');
+      sheet.className = 'page';
 
-        const photoSrc = photo.image ? photo.image.src : photo.src;
+      const front = document.createElement('div');
+      front.className = 'page-side page-front';
+      front.innerHTML = polaroidHTML(photoRecords[i], i);
 
-        // Sisi Depan: Tampil di sebelah KANAN sebelum dibalik
-        const front = document.createElement('div');
-        front.className = 'page-side page-front';
-        front.innerHTML = `
-          <span class="page-badge">Memori #${index + 1}</span>
-          <img class="page-photo" src="${photoSrc}" alt="Foto kenangan ${index + 1}: ${photo.message}" draggable="false">
-          <span class="page-caption">${photo.message}</span>
-          <span class="polaroid-sticker" aria-hidden="true">♥</span>
-        `;
+      const back = document.createElement('div');
+      back.className = 'page-side page-back';
+      back.innerHTML = photoRecords[i + 1]
+        ? polaroidHTML(photoRecords[i + 1], i + 1)
+        : `<div class="page-note"><div class="base-content"><div class="base-stamp" aria-hidden="true">💗</div><p class="base-desc">Terima kasih untuk<br>setiap momennya</p></div></div>`;
 
-        // Sisi Belakang: Tampil di sebelah KIRI setelah dibalik (tetap menampilkan foto kenangan tersebut!)
-        const back = document.createElement('div');
-        back.className = 'page-side page-back';
-        back.innerHTML = `
-          <span class="page-badge left">Memori #${index + 1}</span>
-          <img class="page-photo" src="${photoSrc}" alt="Foto kenangan ${index + 1}: ${photo.message}" draggable="false">
-          <span class="page-caption">${photo.message}</span>
-          <span class="polaroid-sticker left" aria-hidden="true">♥</span>
-        `;
-
-        page.append(front, back);
-        book.appendChild(page);
-        pageElements.push(page);
-      });
+      sheet.append(front, back);
+      book.appendChild(sheet);
+      sheets.push(sheet);
+      setSheetZ(sheet, sheetIndex);
     }
     updateBook();
   }
 
-  function updateBook(){
-    document.getElementById('prevPage').disabled = currentPage === 0;
-    document.getElementById('nextPage').disabled = currentPage === pageElements.length;
-    revealHeart.disabled = photoRecords.length === 0 || currentPage !== pageElements.length;
+  /* Lembar yang belum dibuka: indeks kecil di atas. Yang sudah dibuka: indeks besar di atas. */
+  function setSheetZ(sheet, index){
+    sheet.style.zIndex = sheet.classList.contains('flipped') ? String(10 + index) : String(300 - index);
+  }
 
-    if(photoRecords.length === 0){
-      pageCount.textContent = 'Kenangan manis menanti';
-    } else if(currentPage === 0){
-      pageCount.textContent = `Buka kenangan pertama (1 dari ${pageElements.length})`;
-    } else if(currentPage === pageElements.length){
-      pageCount.textContent = 'Semua kenangan terbuka 🎉';
-    } else {
-      pageCount.textContent = `Foto ${currentPage + 1} dari ${pageElements.length}`;
+  function updateBook(){
+    const total = sheets.length;
+    $('prevPage').disabled = currentPage === 0;
+    $('nextPage').disabled = currentPage === total;
+    const finished = total > 0 && currentPage === total;
+    revealHeart.disabled = !finished;
+    revealHeart.classList.toggle('glow', finished);
+    $('bookProgress').style.width = total ? `${(currentPage / total) * 100}%` : '0';
+
+    if(total === 0){
+      pageCount.textContent = 'Kenangan manis sedang disiapkan…';
+    }else if(currentPage === 0){
+      pageCount.textContent = 'Ketuk atau geser buku untuk membuka';
+    }else if(finished){
+      pageCount.textContent = 'Semua kenangan terbuka 🎉 Ada satu kejutan lagi…';
+    }else{
+      pageCount.textContent = `Halaman ${currentPage} dari ${total}`;
     }
   }
 
   function turnPage(direction){
     tryPlayMusic();
-    if(direction > 0 && currentPage < pageElements.length){
-      const pageToFlip = pageElements[currentPage];
-      pageToFlip.classList.add('flipped');
-      const flippedIndex = currentPage;
-      setTimeout(()=>{
-        if(pageToFlip.classList.contains('flipped')){
-          pageToFlip.style.zIndex = String(10 + flippedIndex);
-        }
-      }, 380);
-      currentPage++;
-      updateBook();
-      if(currentPage === pageElements.length){
-        launchConfetti(0.5);
-      }
+    let sheet, index;
+    if(direction > 0 && currentPage < sheets.length){
+      index = currentPage++;
+      sheet = sheets[index];
+      sheet.classList.add('flipped');
     }else if(direction < 0 && currentPage > 0){
-      currentPage--;
-      const pageToUnflip = pageElements[currentPage];
-      pageToUnflip.style.zIndex = String(30 + currentPage);
-      pageToUnflip.classList.remove('flipped');
-      setTimeout(()=>{
-        if(!pageToUnflip.classList.contains('flipped')){
-          pageToUnflip.style.zIndex = String(20 - currentPage);
-        }
-      }, 400);
-      updateBook();
+      index = --currentPage;
+      sheet = sheets[index];
+      sheet.classList.remove('flipped');
+    }else{
+      return;
     }
+    // Lembar yang sedang berputar selalu paling atas
+    sheet.style.zIndex = String(1000 + (++flipCounter));
+    clearTimeout(sheet._zTimer);
+    sheet._zTimer = setTimeout(()=>setSheetZ(sheet, index), 920);
+
+    updateBook();
+    if(direction > 0 && currentPage === sheets.length) launchConfetti(0.5);
   }
 
-  document.getElementById('nextPage').addEventListener('click', ()=>turnPage(1));
-  document.getElementById('prevPage').addEventListener('click', ()=>turnPage(-1));
+  $('nextPage').addEventListener('click', ()=>turnPage(1));
+  $('prevPage').addEventListener('click', ()=>turnPage(-1));
 
+  // Geser (swipe) atau ketuk sisi kiri/kanan buku
   let swipeStart = null;
   book.addEventListener('pointerdown', event=>{
     if(event.pointerType === 'mouse' && event.button !== 0) return;
     swipeStart = {x:event.clientX, y:event.clientY};
-    book.setPointerCapture(event.pointerId);
   });
   book.addEventListener('pointerup', event=>{
     if(!swipeStart) return;
-    const deltaX = event.clientX - swipeStart.x;
-    const deltaY = event.clientY - swipeStart.y;
-    if(Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25){
-      turnPage(deltaX < 0 ? 1 : -1);
+    const dx = event.clientX - swipeStart.x;
+    const dy = event.clientY - swipeStart.y;
+    if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.25){
+      turnPage(dx < 0 ? 1 : -1);
+    }else if(Math.hypot(dx, dy) < 8){
+      const rect = book.getBoundingClientRect();
+      turnPage(event.clientX > rect.left + rect.width / 2 ? 1 : -1);
     }
     swipeStart = null;
   });
-  book.addEventListener('pointercancel', ()=>{swipeStart = null;});
+  book.addEventListener('pointercancel', ()=>{ swipeStart = null; });
+  book.addEventListener('pointerleave', ()=>{ swipeStart = null; });
+
   loadConfiguredPhotos();
 
   /* ========================================================
-     SCREEN 4: THREE.JS 3D PHOTO HEART (BENTUK HATI PRESISI)
+     LAYAR 4: HATI FOTO 3D (THREE.JS)
      ======================================================== */
+  let scene, camera, renderer, heartGroup, starField, starGeometry, starMaterial;
+  let starStartPositions, starTargetPositions;
+  let ambientStarField;
+  let floatingStarSprites = [];
+  let floatingHeartSprites = [];
+  let floatingDecorationGroup;
+  let transitionStarted = 0;
+  let isDraggingHeart = false;
+  let lastPointer = null;
+  let pointerDownPos = null;
+  let animationFrame = 0;
+  let spinVelocity = 0;
+  const raycaster = window.THREE ? new THREE.Raycaster() : null;
+
+  const isPortrait = () => window.innerWidth / window.innerHeight < .7;
+
   function getHeartCurvePoint(angle){
     return {
       x: 16 * Math.pow(Math.sin(angle), 3) / 17,
@@ -1048,81 +979,56 @@
     };
   }
 
-  /* Pola titik hati konsentris (Cincin luar, tengah, dalam, dan pusat) */
+  /* Titik-titik hati konsentris (cincin luar, tengah, dalam, pusat) */
   function getHeartLayout(){
     const points = [];
-    function computePoint(angle, scale){
-      const x = (16 * Math.pow(Math.sin(angle), 3) / 17) * scale;
-      const y = (((13 * Math.cos(angle) - 5 * Math.cos(2*angle) - 2 * Math.cos(3*angle) - Math.cos(4*angle)) / 17) + 0.16) * scale;
-      return { x, y };
-    }
-
-    // Cincin Luar (Kontur hati utama yang jelas) - 18 foto
-    const count1 = 18;
-    for(let i = 0; i < count1; i++){
-      const angle = (i / count1) * Math.PI * 2;
-      points.push(computePoint(angle, 2.3));
-    }
-
-    // Cincin Tengah - 12 foto
-    const count2 = 12;
-    for(let i = 0; i < count2; i++){
-      const angle = ((i + 0.5) / count2) * Math.PI * 2;
-      points.push(computePoint(angle, 1.58));
-    }
-
-    // Cincin Dalam - 6 foto
-    const count3 = 6;
-    for(let i = 0; i < count3; i++){
-      const angle = (i / count3) * Math.PI * 2;
-      points.push(computePoint(angle, 0.9));
-    }
-
-    // Titik Pusat - 1 foto
-    points.push({ x: 0, y: 0.12 });
-
+    const ring = (count, scale, offset) => {
+      for(let i = 0; i < count; i++){
+        const p = getHeartCurvePoint(((i + offset) / count) * Math.PI * 2);
+        points.push({x: p.x * scale, y: (p.y + 0.16) * scale});
+      }
+    };
+    ring(18, 2.3, 0);
+    ring(12, 1.58, 0.5);
+    ring(6, 0.9, 0);
+    points.push({x: 0, y: 0.12});
     return points;
   }
 
   function makePhotoTexture(photo){
     if(photo.texture) return photo.texture;
-    const textureCanvas = document.createElement('canvas');
-    textureCanvas.width = 512;
-    textureCanvas.height = 620;
-    const context = textureCanvas.getContext('2d');
+    const c = document.createElement('canvas');
+    c.width = 512;
+    c.height = 620;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fffdfa';
+    ctx.fillRect(0, 0, 512, 620);
 
-    // Kertas Polaroid
-    context.fillStyle = '#fffdfa';
-    context.fillRect(0, 0, 512, 620);
+    const img = photo.image;
+    const w = img.naturalWidth || 400;
+    const h = img.naturalHeight || 400;
+    const size = Math.min(w, h);
+    try{
+      ctx.drawImage(img, (w - size) / 2, (h - size) / 2, size, size, 32, 28, 448, 448);
+    }catch(e){ /* gambar gagal digambar — biarkan kosong */ }
 
-    const naturalW = photo.image ? photo.image.naturalWidth : 400;
-    const naturalH = photo.image ? photo.image.naturalHeight : 400;
-    const imageSize = Math.min(naturalW, naturalH);
-    const sourceX = (naturalW - imageSize) / 2;
-    const sourceY = (naturalH - imageSize) / 2;
+    ctx.strokeStyle = '#e8d2ca';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(30, 26, 452, 452);
 
-    if(photo.image){
-      context.drawImage(photo.image, sourceX, sourceY, imageSize, imageSize, 32, 28, 448, 448);
-    }
+    ctx.fillStyle = '#dc637b';
+    ctx.font = 'bold 28px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText('♥', 470, 520);
 
-    // Garis Frame Foto
-    context.strokeStyle = '#e8d2ca';
-    context.lineWidth = 4;
-    context.strokeRect(30, 26, 452, 452);
+    ctx.fillStyle = '#4e303b';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 40px Caveat, "Segoe Print", "Bradley Hand", cursive';
+    ctx.fillText(photo.message, 256, 570, 440);
 
-    // Stempel Hati & Caption
-    context.fillStyle = '#dc637b';
-    context.font = 'bold 28px Arial';
-    context.textAlign = 'right';
-    context.fillText('♥', 470, 520);
-
-    context.fillStyle = '#4e303b';
-    context.textAlign = 'center';
-    context.font = 'bold 24px "Segoe Print", "Bradley Hand", cursive';
-    context.fillText(photo.message, 256, 565, 420);
-
-    photo.texture = new THREE.CanvasTexture(textureCanvas);
+    photo.texture = new THREE.CanvasTexture(c);
     photo.texture.encoding = THREE.sRGBEncoding;
+    photo.texture.anisotropy = renderer ? renderer.capabilities.getMaxAnisotropy() : 1;
     return photo.texture;
   }
 
@@ -1131,32 +1037,19 @@
     heartGroup.position.y = -0.05;
     scene.add(heartGroup);
 
-    const layout = getHeartLayout();
     const tileSize = 0.44;
-
-    layout.forEach((point, index)=>{
+    const geometry = new THREE.PlaneGeometry(tileSize, tileSize * 1.21);
+    getHeartLayout().forEach((point, index)=>{
       const photo = photoRecords[index % photoRecords.length];
-      const material = new THREE.MeshBasicMaterial({
-        map: makePhotoTexture(photo),
-        side: THREE.DoubleSide
-      });
-      const tile = new THREE.Mesh(new THREE.PlaneGeometry(tileSize, tileSize * 1.25), material);
-
-      // Lengkungan 3D (tengah sedikit cembung ke depan seperti bantal cinta)
+      const material = new THREE.MeshBasicMaterial({map: makePhotoTexture(photo), side: THREE.DoubleSide});
+      const tile = new THREE.Mesh(geometry, material);
       const dist = Math.hypot(point.x, point.y);
-      const zCurve = (2.4 - Math.min(dist, 2.4)) * 0.12 + (Math.random() - 0.5) * 0.08;
-
-      tile.position.set(point.x, point.y, zCurve);
-      tile.rotation.set(
-        (Math.random() - 0.5) * 0.1,
-        (Math.random() - 0.5) * 0.1,
-        (Math.random() - 0.5) * 0.14
-      );
-
-      tile.userData = { photo };
+      const z = (2.4 - Math.min(dist, 2.4)) * 0.12 + (Math.random() - 0.5) * 0.08;
+      tile.position.set(point.x, point.y, z);
+      tile.rotation.set((Math.random() - .5) * .1, (Math.random() - .5) * .1, (Math.random() - .5) * .14);
+      tile.userData = {photo, baseZ: z, phase: Math.random() * Math.PI * 2};
       heartGroup.add(tile);
     });
-
     heartGroup.scale.setScalar(0.08);
   }
 
@@ -1165,64 +1058,51 @@
     starStartPositions = new Float32Array(count * 3);
     starTargetPositions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
-    const palette = ['#ffd08a', '#ff7188', '#ffffff', '#ff91a1', '#7dd8c7'].map(color => new THREE.Color(color));
+    const palette = ['#ffd08a','#ff7188','#ffffff','#ff91a1','#7dd8c7'].map(c => new THREE.Color(c));
 
-    for(let index = 0; index < count; index++){
-      const arm = index % 5;
+    for(let i = 0; i < count; i++){
+      const arm = i % 5;
       const radius = 7 + Math.random() * 8;
       const angle = (arm / 5) * Math.PI * 2 + radius * 0.32 + (Math.random() - 0.5) * 0.5;
-      const offset = index * 3;
+      const o = i * 3;
+      starStartPositions[o] = Math.cos(angle) * radius;
+      starStartPositions[o + 1] = (Math.random() - 0.5) * 9;
+      starStartPositions[o + 2] = Math.sin(angle) * radius;
 
-      starStartPositions[offset] = Math.cos(angle) * radius;
-      starStartPositions[offset + 1] = (Math.random() - 0.5) * 9;
-      starStartPositions[offset + 2] = Math.sin(angle) * radius;
-
-      const heartPt = getHeartCurvePoint((index / count) * Math.PI * 2);
-      starTargetPositions[offset] = heartPt.x * 2.5 + (Math.random() - 0.5) * 0.35;
-      starTargetPositions[offset + 1] = heartPt.y * 2.5 + 0.15 + (Math.random() - 0.5) * 0.35;
-      starTargetPositions[offset + 2] = 0.5 + (Math.random() - 0.5) * 1.2;
+      const hp = getHeartCurvePoint((i / count) * Math.PI * 2);
+      starTargetPositions[o] = hp.x * 2.5 + (Math.random() - 0.5) * 0.35;
+      starTargetPositions[o + 1] = hp.y * 2.5 + 0.15 + (Math.random() - 0.5) * 0.35;
+      starTargetPositions[o + 2] = 0.5 + (Math.random() - 0.5) * 1.2;
 
       const color = palette[Math.floor(Math.random() * palette.length)];
-      colors[offset] = color.r;
-      colors[offset + 1] = color.g;
-      colors[offset + 2] = color.b;
+      colors[o] = color.r; colors[o + 1] = color.g; colors[o + 2] = color.b;
     }
 
     starGeometry = new THREE.BufferGeometry();
     starGeometry.setAttribute('position', new THREE.BufferAttribute(starStartPositions.slice(), 3));
     starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     starMaterial = new THREE.PointsMaterial({
-      size: 0.045,
-      vertexColors: true,
-      blending: THREE.AdditiveBlending,
-      transparent: true,
-      opacity: 0.85,
-      depthWrite: false
+      size: 0.05, map: getSparkleTexture(), vertexColors: true,
+      blending: THREE.AdditiveBlending, transparent: true, opacity: 0.85, depthWrite: false
     });
     starField = new THREE.Points(starGeometry, starMaterial);
     scene.add(starField);
   }
 
-  /* Tekstur Bintang Berkilau 4-Sudut (Sparkle Star) */
   let cachedSparkleTexture = null;
   function getSparkleTexture(){
     if(cachedSparkleTexture) return cachedSparkleTexture;
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-
-    // Soft radial aura glow
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const ctx = c.getContext('2d');
     const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    grad.addColorStop(0.2, 'rgba(255, 218, 150, 0.9)');
-    grad.addColorStop(0.5, 'rgba(255, 113, 136, 0.35)');
-    grad.addColorStop(1, 'rgba(255, 113, 136, 0)');
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.2, 'rgba(255,218,150,0.9)');
+    grad.addColorStop(0.5, 'rgba(255,113,136,0.35)');
+    grad.addColorStop(1, 'rgba(255,113,136,0)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 128, 128);
-
-    // 4-pointed sparkle flare
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
     ctx.beginPath();
     ctx.moveTo(64, 10);
     ctx.quadraticCurveTo(64, 64, 118, 64);
@@ -1230,25 +1110,20 @@
     ctx.quadraticCurveTo(64, 64, 10, 64);
     ctx.quadraticCurveTo(64, 64, 64, 10);
     ctx.fill();
-
-    // Center core
     ctx.beginPath();
     ctx.arc(64, 64, 6, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#fff';
     ctx.fill();
-
-    cachedSparkleTexture = new THREE.CanvasTexture(canvas);
+    cachedSparkleTexture = new THREE.CanvasTexture(c);
     return cachedSparkleTexture;
   }
 
-  /* Tekstur Balon Hati Mini Bercahaya */
   let cachedHeartParticleTexture = null;
   function getHeartParticleTexture(){
     if(cachedHeartParticleTexture) return cachedHeartParticleTexture;
-    const canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 64;
-    const ctx = canvas.getContext('2d');
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const ctx = c.getContext('2d');
     ctx.shadowColor = '#ff7188';
     ctx.shadowBlur = 10;
     ctx.fillStyle = '#ff8fa1';
@@ -1256,191 +1131,148 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('♥', 32, 34);
-    cachedHeartParticleTexture = new THREE.CanvasTexture(canvas);
+    cachedHeartParticleTexture = new THREE.CanvasTexture(c);
     return cachedHeartParticleTexture;
   }
 
-  /* Membangun Hiasan Bintang & Balon di Luar Bentuk Hati */
   function buildAmbientDecorations(){
     floatingDecorationGroup = new THREE.Group();
     scene.add(floatingDecorationGroup);
-
     const sparkleTexture = getSparkleTexture();
-    const heartParticleTexture = getHeartParticleTexture();
+    const heartTexture = getHeartParticleTexture();
 
-    // 1. Ratusan Bintang Galaxy Kecil di Luar Hati
+    // 1. Debu bintang galaksi
     const ambientCount = 520;
-    ambientStarGeometry = new THREE.BufferGeometry();
-    const ambientPositions = new Float32Array(ambientCount * 3);
-    const ambientColors = new Float32Array(ambientCount * 3);
-    const palette = ['#ffd08a', '#ff7188', '#ffffff', '#e8b5ff', '#8ce6d6'].map(c => new THREE.Color(c));
-
+    const positions = new Float32Array(ambientCount * 3);
+    const colors = new Float32Array(ambientCount * 3);
+    const palette = ['#ffd08a','#ff7188','#ffffff','#e8b5ff','#8ce6d6'].map(c => new THREE.Color(c));
     for(let i = 0; i < ambientCount; i++){
       const radius = 4.2 + Math.random() * 12;
       const theta = Math.random() * Math.PI * 2;
       const phi = (Math.random() - 0.5) * Math.PI * 0.95;
-
-      const x = radius * Math.cos(phi) * Math.cos(theta) * 1.35;
-      const y = radius * Math.sin(phi) + (Math.random() - 0.5) * 2;
-      const z = radius * Math.cos(phi) * Math.sin(theta) - 2.5;
-
-      ambientPositions[i * 3] = x;
-      ambientPositions[i * 3 + 1] = y;
-      ambientPositions[i * 3 + 2] = z;
-
+      positions[i * 3] = radius * Math.cos(phi) * Math.cos(theta) * 1.35;
+      positions[i * 3 + 1] = radius * Math.sin(phi) + (Math.random() - 0.5) * 2;
+      positions[i * 3 + 2] = radius * Math.cos(phi) * Math.sin(theta) - 2.5;
       const color = palette[Math.floor(Math.random() * palette.length)];
-      ambientColors[i * 3] = color.r;
-      ambientColors[i * 3 + 1] = color.g;
-      ambientColors[i * 3 + 2] = color.b;
+      colors[i * 3] = color.r; colors[i * 3 + 1] = color.g; colors[i * 3 + 2] = color.b;
     }
-
-    ambientStarGeometry.setAttribute('position', new THREE.BufferAttribute(ambientPositions, 3));
-    ambientStarGeometry.setAttribute('color', new THREE.BufferAttribute(ambientColors, 3));
-
-    const ambientMaterial = new THREE.PointsMaterial({
-      size: 0.055,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.78,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    ambientStarField = new THREE.Points(ambientStarGeometry, ambientMaterial);
+    const ambientGeometry = new THREE.BufferGeometry();
+    ambientGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    ambientGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    ambientStarField = new THREE.Points(ambientGeometry, new THREE.PointsMaterial({
+      size: 0.06, map: sparkleTexture, vertexColors: true, transparent: true, opacity: 0.8,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    }));
     floatingDecorationGroup.add(ambientStarField);
 
-    // 2. Balon Bintang Berkilau (Floating Sparkle Star Sprites)
-    floatingStarSprites = [];
-    const starColors = [0xffd08a, 0xff7188, 0xffffff, 0xf7b2ff, 0x9be8dc];
-    const starCount = 42;
+    // 2 & 3. Bintang berkilau dan balon hati yang mengapung
+    const spawn = (count, distMin, distRange, texture, colorList, scaleMin, scaleRange, opacity, list) => {
+      list.length = 0;
+      for(let i = 0; i < count; i++){
+        const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+        const dist = distMin + Math.random() * distRange;
+        const x = Math.cos(angle) * dist * 1.3;
+        const y = Math.sin(angle) * dist * 0.94 + (Math.random() - 0.5) * 1.7;
+        const z = (Math.random() - 0.5) * 4;
+        const material = new THREE.SpriteMaterial({
+          map: texture, color: colorList ? colorList[i % colorList.length] : 0xffffff,
+          transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        const sprite = new THREE.Sprite(material);
+        const baseScale = scaleMin + Math.random() * scaleRange;
+        sprite.scale.set(baseScale, baseScale, 1);
+        sprite.position.set(x, y, z);
+        sprite.userData = {
+          baseX: x, baseY: y, baseScale,
+          phase: Math.random() * Math.PI * 2,
+          speedY: 0.0009 + Math.random() * 0.0016,
+          speedPulse: 0.002 + Math.random() * 0.0025
+        };
+        floatingDecorationGroup.add(sprite);
+        list.push(sprite);
+      }
+    };
+    spawn(42, 3.3, 4.6, sparkleTexture, [0xffd08a,0xff7188,0xffffff,0xf7b2ff,0x9be8dc], 0.38, 0.46, 0.85, floatingStarSprites);
+    spawn(18, 3.4, 4.4, heartTexture, null, 0.28, 0.28, 0.7, floatingHeartSprites);
+  }
 
-    for(let i = 0; i < starCount; i++){
-      const angle = (i / starCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.35;
-      const dist = 3.3 + Math.random() * 4.6;
-      const x = Math.cos(angle) * dist * 1.3;
-      const y = Math.sin(angle) * dist * 0.95 + (Math.random() - 0.5) * 1.6;
-      const z = (Math.random() - 0.5) * 4.2;
-
-      const spriteMat = new THREE.SpriteMaterial({
-        map: sparkleTexture,
-        color: starColors[i % starColors.length],
-        transparent: true,
-        opacity: 0.85,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-
-      const sprite = new THREE.Sprite(spriteMat);
-      const baseScale = 0.38 + Math.random() * 0.46;
-      sprite.scale.set(baseScale, baseScale, 1);
-      sprite.position.set(x, y, z);
-
-      sprite.userData = {
-        baseX: x,
-        baseY: y,
-        baseZ: z,
-        baseScale: baseScale,
-        phase: Math.random() * Math.PI * 2,
-        speedY: 0.0012 + Math.random() * 0.0016,
-        speedPulse: 0.002 + Math.random() * 0.0025
-      };
-
-      floatingDecorationGroup.add(sprite);
-      floatingStarSprites.push(sprite);
-    }
-
-    // 3. Balon Hati Mengapung (Floating Heart Sprites)
-    floatingHeartSprites = [];
-    const heartCount = 18;
-    for(let i = 0; i < heartCount; i++){
-      const angle = (i / heartCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
-      const dist = 3.4 + Math.random() * 4.4;
-      const x = Math.cos(angle) * dist * 1.28;
-      const y = Math.sin(angle) * dist * 0.92 + (Math.random() - 0.5) * 1.8;
-      const z = (Math.random() - 0.5) * 3.8;
-
-      const heartMat = new THREE.SpriteMaterial({
-        map: heartParticleTexture,
-        transparent: true,
-        opacity: 0.7,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-
-      const heartSprite = new THREE.Sprite(heartMat);
-      const baseScale = 0.28 + Math.random() * 0.28;
-      heartSprite.scale.set(baseScale, baseScale, 1);
-      heartSprite.position.set(x, y, z);
-
-      heartSprite.userData = {
-        baseX: x,
-        baseY: y,
-        baseZ: z,
-        baseScale: baseScale,
-        phase: Math.random() * Math.PI * 2,
-        speedY: 0.0009 + Math.random() * 0.0012
-      };
-
-      floatingDecorationGroup.add(heartSprite);
-      floatingHeartSprites.push(heartSprite);
-    }
+  function fitCamera(){
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.position.z = isPortrait() ? 10.5 : 8.8;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
   function start3D(){
-    if(!window.THREE || photoRecords.length === 0) return;
+    if(!window.THREE || photoRecords.length === 0){
+      loveScreen.classList.add('no-webgl');
+      $('loveHint').textContent = 'Selamat ulang tahun! 🎂';
+      return;
+    }
     if(!renderer){
-      const canvas = document.getElementById('canvas');
-      renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      try{
+        renderer = new THREE.WebGLRenderer({canvas: glCanvas, antialias: true, alpha: true});
+      }catch(e){
+        loveScreen.classList.add('no-webgl');
+        $('loveHint').textContent = 'Selamat ulang tahun! 🎂';
+        return;
+      }
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+      renderer.outputEncoding = THREE.sRGBEncoding; // warna foto tidak kusam
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, .1, 100);
-      camera.position.z = window.innerWidth / window.innerHeight < .7 ? 10.5 : 8.8;
+      camera = new THREE.PerspectiveCamera(45, 1, .1, 100);
+      fitCamera();
       buildPhotoHeart();
       buildConvergingStars();
       buildAmbientDecorations();
       transitionStarted = performance.now();
     }
+    glCanvas.classList.add('visible');
     if(animationFrame) return;
+
     const animate = ()=>{
-      animationFrame = window.requestAnimationFrame(animate);
+      animationFrame = requestAnimationFrame(animate);
       const now = performance.now();
-      const elapsed = now - transitionStarted;
-      const amount = Math.min(elapsed / 2800, 1);
-      revealProgress = 1 - Math.pow(1 - amount, 3);
-      const currentPositions = starGeometry.attributes.position.array;
+      const amount = Math.min((now - transitionStarted) / 2800, 1);
+      const reveal = 1 - Math.pow(1 - amount, 3);
+
       if(amount < 1){
-        for(let index = 0; index < currentPositions.length; index++){
-          currentPositions[index] = starStartPositions[index] + (starTargetPositions[index] - starStartPositions[index]) * revealProgress;
+        const pos = starGeometry.attributes.position.array;
+        for(let i = 0; i < pos.length; i++){
+          pos[i] = starStartPositions[i] + (starTargetPositions[i] - starStartPositions[i]) * reveal;
         }
         starGeometry.attributes.position.needsUpdate = true;
       }
-      heartGroup.scale.setScalar((window.innerWidth / window.innerHeight < .7 ? .72 : 1) * (.08 + .92 * revealProgress));
-      starMaterial.opacity = .82 - .35 * revealProgress;
-      if(!isDraggingHeart) heartGroup.rotation.y += .0015;
-      starField.rotation.y += .00025;
 
-      // Animasi rotasi perlahan galaxy stardust di latar belakang
-      if(ambientStarField){
-        ambientStarField.rotation.y += 0.0003;
-        ambientStarField.rotation.x += 0.0001;
+      // Detak jantung halus setelah hati terbentuk
+      const beat = amount < 1 ? 1 : 1 + 0.025 * Math.max(0, Math.sin(now * 0.0045)) ** 6;
+      heartGroup.scale.setScalar((isPortrait() ? .72 : 1) * (.08 + .92 * reveal) * beat);
+      starMaterial.opacity = .82 - .35 * reveal;
+
+      if(!isDraggingHeart){
+        heartGroup.rotation.y += 0.0015 + spinVelocity;
+        spinVelocity *= 0.94; // efek momentum setelah digeser
+        heartGroup.rotation.x *= 0.985; // perlahan kembali tegak
       }
+      heartGroup.children.forEach(tile=>{
+        tile.position.z = tile.userData.baseZ + Math.sin(now * 0.0012 + tile.userData.phase) * 0.03;
+      });
+      starField.rotation.y += 0.00025;
+      ambientStarField.rotation.y += 0.0003;
+      ambientStarField.rotation.x += 0.0001;
 
-      // Animasi bintang berkilau mengapung & berkelap-kelip lembut seperti balon
-      floatingStarSprites.forEach(sprite => {
+      floatingStarSprites.forEach(sprite=>{
         const u = sprite.userData;
         sprite.position.y = u.baseY + Math.sin(now * u.speedY + u.phase) * 0.22;
-        sprite.position.x = u.baseX + Math.cos(now * (u.speedY * 0.7) + u.phase) * 0.12;
-
+        sprite.position.x = u.baseX + Math.cos(now * u.speedY * 0.7 + u.phase) * 0.12;
         const pulse = 1 + 0.22 * Math.sin(now * u.speedPulse + u.phase);
         sprite.scale.set(u.baseScale * pulse, u.baseScale * pulse, 1);
-        sprite.material.opacity = 0.65 + 0.3 * Math.sin(now * u.speedPulse * 1.2 + u.phase);
+        sprite.material.opacity = 0.6 + 0.3 * Math.sin(now * u.speedPulse * 1.2 + u.phase);
       });
-
-      // Animasi balon hati mini yang mengapung di udara
-      floatingHeartSprites.forEach(sprite => {
+      floatingHeartSprites.forEach(sprite=>{
         const u = sprite.userData;
         sprite.position.y = u.baseY + Math.sin(now * u.speedY + u.phase) * 0.26;
-        sprite.position.x = u.baseX + Math.cos(now * (u.speedY * 0.8) + u.phase) * 0.14;
+        sprite.position.x = u.baseX + Math.cos(now * u.speedY * 0.8 + u.phase) * 0.14;
         const pulse = 1 + 0.16 * Math.sin(now * 0.002 + u.phase);
         sprite.scale.set(u.baseScale * pulse, u.baseScale * pulse, 1);
       });
@@ -1452,45 +1284,42 @@
 
   function stop3D(){
     if(animationFrame){
-      window.cancelAnimationFrame(animationFrame);
+      cancelAnimationFrame(animationFrame);
       animationFrame = 0;
     }
+    // Sembunyikan kanvas agar hati tidak "tertinggal" di belakang layar lain
+    glCanvas.classList.remove('visible');
   }
 
-  /* Raycasting & Dragging 3D Heart */
-  function checkTileClick(clientX, clientY){
-    if(!camera || !heartGroup) return;
-    const mouse = new THREE.Vector2(
-      (clientX / window.innerWidth) * 2 - 1,
-      -(clientY / window.innerHeight) * 2 + 1
-    );
-    const raycaster = new THREE.Raycaster();
+  function tileAt(clientX, clientY){
+    if(!camera || !heartGroup || !raycaster) return null;
+    const mouse = new THREE.Vector2((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(heartGroup.children);
-    if(intersects.length > 0){
-      const tile = intersects[0].object;
-      if(tile.userData && tile.userData.photo){
-        showPhotoPreview(tile.userData.photo);
-      }
-    }
+    const hit = raycaster.intersectObjects(heartGroup.children)[0];
+    return hit && hit.object.userData.photo ? hit.object : null;
   }
 
   loveScreen.addEventListener('pointerdown', event=>{
     if(!heartGroup || (event.pointerType === 'mouse' && event.button !== 0)) return;
-    if(event.target.closest('button, .modal-card, .love-dock')) return;
+    if(event.target.closest('button, .love-dock')) return;
     isDraggingHeart = true;
-    lastPointer = {x:event.clientX, y:event.clientY};
-    pointerDownPos = {x:event.clientX, y:event.clientY};
+    spinVelocity = 0;
+    lastPointer = pointerDownPos = {x:event.clientX, y:event.clientY};
     loveScreen.classList.add('is-dragging');
     loveScreen.setPointerCapture(event.pointerId);
   });
 
   loveScreen.addEventListener('pointermove', event=>{
-    if(!isDraggingHeart || !lastPointer) return;
-    const deltaX = event.clientX - lastPointer.x;
-    const deltaY = event.clientY - lastPointer.y;
-    heartGroup.rotation.y += deltaX * .008;
-    heartGroup.rotation.x = Math.max(-.8, Math.min(.8, heartGroup.rotation.x + deltaY * .006));
+    if(!heartGroup) return;
+    if(!isDraggingHeart){
+      if(event.pointerType === 'mouse') loveScreen.classList.toggle('over-tile', !!tileAt(event.clientX, event.clientY));
+      return;
+    }
+    const dx = event.clientX - lastPointer.x;
+    const dy = event.clientY - lastPointer.y;
+    heartGroup.rotation.y += dx * .008;
+    heartGroup.rotation.x = Math.max(-.8, Math.min(.8, heartGroup.rotation.x + dy * .006));
+    spinVelocity = Math.max(-.08, Math.min(.08, dx * .002));
     lastPointer = {x:event.clientX, y:event.clientY};
   });
 
@@ -1498,99 +1327,102 @@
     if(!isDraggingHeart) return;
     isDraggingHeart = false;
     loveScreen.classList.remove('is-dragging');
-
-    if(pointerDownPos && event){
-      const dist = Math.hypot(event.clientX - pointerDownPos.x, event.clientY - pointerDownPos.y);
-      if(dist < 6){
-        checkTileClick(event.clientX, event.clientY);
-      }
+    if(event.type === 'pointerup' && pointerDownPos &&
+       Math.hypot(event.clientX - pointerDownPos.x, event.clientY - pointerDownPos.y) < 6){
+      spinVelocity = 0;
+      const tile = tileAt(event.clientX, event.clientY);
+      if(tile) showPhotoPreview(tile.userData.photo);
     }
-    lastPointer = null;
-    pointerDownPos = null;
+    lastPointer = pointerDownPos = null;
   }
-
   loveScreen.addEventListener('pointerup', stopDraggingHeart);
   loveScreen.addEventListener('pointercancel', stopDraggingHeart);
 
-  window.addEventListener('resize', ()=>{
-    if(!renderer) return;
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.position.z = window.innerWidth / window.innerHeight < .7 ? 10.5 : 8.8;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+  window.addEventListener('resize', ()=>{ if(renderer) fitCamera(); });
 
   /* ========================================================
-     MODALS: SURAT UCAPAN (TYPEWRITER) & PREVIEW FOTO
+     MODAL: SURAT (EFEK MESIN TIK) & PREVIEW FOTO
      ======================================================== */
+  const letterModal = $('letterModal');
+  const photoModal = $('photoModal');
+  const letterBody = $('letterBody');
+  const skipHint = $('skipHint');
   let typewriterTimer = null;
-  function openLetter(){
-    launchConfetti(0.45);
-    const modal = document.getElementById('letterModal');
-    const titleEl = document.getElementById('letterTitle');
-    const bodyEl = document.getElementById('letterBody');
-    titleEl.textContent = CONFIG.letter.title;
-    bodyEl.textContent = '';
+  let lastFocus = null;
+
+  function openModal(modal, focusEl){
+    lastFocus = document.activeElement;
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
-
-    if(typewriterTimer) clearInterval(typewriterTimer);
-    const fullText = CONFIG.letter.content;
-    let charIndex = 0;
-    typewriterTimer = setInterval(()=>{
-      if(charIndex < fullText.length){
-        bodyEl.textContent += fullText[charIndex];
-        charIndex++;
-      }else{
-        clearInterval(typewriterTimer);
-        typewriterTimer = null;
-      }
-    }, 25);
+    setTimeout(()=>focusEl.focus({preventScroll:true}), 50);
   }
-
-  function closeLetter(){
-    const modal = document.getElementById('letterModal');
+  function closeModal(modal){
+    if(modal.classList.contains('hidden')) return;
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
-    if(typewriterTimer){
-      clearInterval(typewriterTimer);
-      typewriterTimer = null;
-    }
+    if(lastFocus && lastFocus.focus) lastFocus.focus({preventScroll:true});
+  }
+
+  function finishTyping(){
+    if(typewriterTimer){ clearInterval(typewriterTimer); typewriterTimer = null; }
+    letterBody.textContent = CONFIG.letter.content;
+    letterBody.classList.remove('typing');
+    skipHint.classList.add('gone');
+  }
+
+  function openLetter(){
+    launchConfetti(0.45);
+    $('letterTitle').textContent = CONFIG.letter.title;
+    letterBody.textContent = '';
+    skipHint.classList.remove('gone');
+    openModal(letterModal, $('closeLetterBtn'));
+
+    if(typewriterTimer) clearInterval(typewriterTimer);
+    if(reduceMotion){ finishTyping(); return; }
+    const chars = Array.from(CONFIG.letter.content); // aman untuk emoji
+    let i = 0;
+    letterBody.classList.add('typing');
+    typewriterTimer = setInterval(()=>{
+      if(i < chars.length){
+        letterBody.textContent += chars[i++];
+      }else{
+        finishTyping();
+      }
+    }, 28);
+  }
+  function closeLetter(){
+    if(typewriterTimer){ clearInterval(typewriterTimer); typewriterTimer = null; }
+    closeModal(letterModal);
   }
 
   function showPhotoPreview(photo){
-    const modal = document.getElementById('photoModal');
-    const img = document.getElementById('previewModalImg');
-    const msg = document.getElementById('previewModalMsg');
-    img.src = photo.image ? photo.image.src : photo.src;
-    msg.textContent = photo.message;
-    modal.classList.remove('hidden');
-    modal.setAttribute('aria-hidden', 'false');
+    const img = $('previewModalImg');
+    img.src = photo.image.src;
+    img.alt = `Foto kenangan: ${photo.message}`;
+    $('previewModalMsg').textContent = photo.message;
+    openModal(photoModal, $('closePhotoBtn'));
   }
+  const closePhotoPreview = ()=>closeModal(photoModal);
 
-  function closePhotoPreview(){
-    const modal = document.getElementById('photoModal');
-    modal.classList.add('hidden');
-    modal.setAttribute('aria-hidden', 'true');
-  }
+  $('openLetterBtn').addEventListener('click', openLetter);
+  $('closeLetterBtn').addEventListener('click', closeLetter);
+  $('doneLetterBtn').addEventListener('click', closeLetter);
+  $('closePhotoBtn').addEventListener('click', closePhotoPreview);
+  $('backToBookBtn').addEventListener('click', ()=>showScreen('s3'));
+  letterBody.addEventListener('click', ()=>{ if(typewriterTimer) finishTyping(); });
+  letterModal.addEventListener('click', e=>{ if(e.target === letterModal) closeLetter(); });
+  photoModal.addEventListener('click', e=>{ if(e.target === photoModal) closePhotoPreview(); });
 
-  document.getElementById('openLetterBtn').addEventListener('click', openLetter);
-  document.getElementById('closeLetterBtn').addEventListener('click', closeLetter);
-  document.getElementById('doneLetterBtn').addEventListener('click', closeLetter);
-  document.getElementById('closePhotoBtn').addEventListener('click', closePhotoPreview);
-  document.getElementById('backToBookBtn').addEventListener('click', ()=>showScreen('s3'));
-
-  document.getElementById('letterModal').addEventListener('click', (e)=>{
-    if(e.target.id === 'letterModal') closeLetter();
-  });
-  document.getElementById('photoModal').addEventListener('click', (e)=>{
-    if(e.target.id === 'photoModal') closePhotoPreview();
-  });
-
-  window.addEventListener('keydown', (e)=>{
+  window.addEventListener('keydown', e=>{
     if(e.key === 'Escape'){
-      closeLetter();
-      closePhotoPreview();
+      if(!photoModal.classList.contains('hidden')) closePhotoPreview();
+      else closeLetter();
+      return;
+    }
+    const modalOpen = !letterModal.classList.contains('hidden') || !photoModal.classList.contains('hidden');
+    if(activeScreen === 's3' && !modalOpen){
+      if(e.key === 'ArrowRight') turnPage(1);
+      if(e.key === 'ArrowLeft') turnPage(-1);
     }
   });
 </script>
